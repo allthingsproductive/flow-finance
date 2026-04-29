@@ -73,8 +73,9 @@ header { display: flex; align-items: center; justify-content: space-between; pad
 .qa-note-row { display: flex; align-items: center; gap: 10px; margin-bottom: 0; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); }
 .qa-note-inp { flex: 1; border: none; background: transparent; outline: none; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-primary); min-width: 0; }
 .qa-note-inp::placeholder { color: var(--text-muted); }
-.qa-date-badge { flex-shrink: 0; padding: 4px 10px; border: 1px solid var(--border); border-radius: 100px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); background: var(--bg); cursor: pointer; white-space: nowrap; position: relative; }
-.qa-date-real { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.qa-date-badge { flex-shrink: 0; padding: 0; border: 1px solid var(--border); border-radius: 100px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); background: var(--bg); cursor: pointer; white-space: nowrap; position: relative; overflow: hidden; }
+.qa-date-real { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 2; }
+#dateLbl { display: block; padding: 4px 10px; pointer-events: none; }
 
 /* Tags row */
 .qa-tags-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-bottom: 14px; min-height: 24px; margin-top: 10px; }
@@ -706,7 +707,7 @@ async function loadUserData(uid) {
 
   // Subscribe to transactions (realtime)
   if (unsubTxns) unsubTxns();
-  const q = fb().query(userCol('transactions'), fb().orderBy('date', 'desc'), fb().orderBy('id', 'desc'));
+  const q = fb().query(userCol('transactions'), fb().orderBy('date', 'desc'));
   unsubTxns = fb().onSnapshot(q, snap => {
     txns = snap.docs.map(d => ({ ...d.data(), _docId: d.id }));
     renderAll();
@@ -730,14 +731,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('hdate').textContent = now.toLocaleDateString('th-TH', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
   document.getElementById('dateInp').value = now.toISOString().slice(0, 10);
   document.getElementById('tagNewInp').addEventListener('keydown', handleTagKey);
-  const dateInp = document.getElementById('dateInp');
-  const dateLbl = document.getElementById('dateLbl');
-  function updateDateLbl() {
-    const d = new Date(dateInp.value + 'T00:00:00');
-    dateLbl.textContent = d.toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' });
-  }
-  dateInp.addEventListener('change', updateDateLbl);
-  updateDateLbl();
   document.getElementById('newTagInp').addEventListener('keydown', e => { if (e.key === 'Enter') createTag(); });
   document.getElementById('searchInput').addEventListener('input', render);
   document.getElementById('amtInp').addEventListener('keydown',  e => { if (e.key === 'Enter') document.getElementById('noteInp').focus(); });
@@ -860,14 +853,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('hdate').textContent = now.toLocaleDateString('th-TH', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
   document.getElementById('dateInp').value = now.toISOString().slice(0, 10);
   document.getElementById('tagNewInp').addEventListener('keydown', handleTagKey);
-  const dateInp = document.getElementById('dateInp');
-  const dateLbl = document.getElementById('dateLbl');
-  function updateDateLbl() {
-    const d = new Date(dateInp.value + 'T00:00:00');
-    dateLbl.textContent = d.toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' });
-  }
-  dateInp.addEventListener('change', updateDateLbl);
-  updateDateLbl();
   document.getElementById('newTagInp').addEventListener('keydown', e => { if (e.key === 'Enter') createTag(); });
   document.getElementById('searchInput').addEventListener('input', render);
   document.getElementById('amtInp').addEventListener('keydown',  e => { if (e.key === 'Enter') document.getElementById('noteInp').focus(); });
@@ -935,13 +920,18 @@ function addTx() {
   const date = document.getElementById('dateInp').value;
   if (!amt || amt <= 0) { showNotif('กรุณากรอกจำนวนเงิน'); return; }
   if (!note)            { showNotif('กรุณากรอกรายละเอียด'); return; }
-  txns.unshift({ id: Date.now(), type: curType, amount: amt, note, date, tags: [...selTags],
-    time: new Date().toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' }) });
-  saveTxns();
-  document.getElementById('amtInp').value  = '';
-  document.getElementById('noteInp').value = '';
-  selTags = []; renderTagPicker(); renderAll();
-  showNotif('✓ บันทึก' + CATS[curType] + 'แล้ว');
+  const tx = {
+    id: Date.now(), type: curType, amount: amt, note, date,
+    tags: [...selTags],
+    time: new Date().toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' })
+  };
+  try {
+    await fb().addDoc(userCol('transactions'), tx);
+    document.getElementById('amtInp').value  = '';
+    document.getElementById('noteInp').value = '';
+    selTags = []; renderTagPicker();
+    showNotif('✓ บันทึก' + CATS[curType] + 'แล้ว');
+  } catch(e) { console.error('addTx',e); showNotif('บันทึกไม่สำเร็จ กรุณาลองใหม่'); }
 }
 
 
