@@ -361,6 +361,24 @@ footer { padding: 18px 0 12px; text-align: center; font-size: 10px; color: var(-
     window._fb = { auth, db, GoogleAuthProvider, signInWithPopup, signOut,
                    onAuthStateChanged, collection, doc, addDoc, deleteDoc,
                    getDocs, setDoc, query, where, orderBy, onSnapshot };
+
+    // expose auth functions globally so onclick handlers can reach them
+    window.signInGoogle = async function() {
+      const provider = new GoogleAuthProvider();
+      try { await signInWithPopup(auth, provider); }
+      catch(e) { console.error('signIn error', e); alert('Login ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'); }
+    };
+    window.signOutUser = async function() {
+      if (window._unsubTxns) { window._unsubTxns(); window._unsubTxns = null; }
+      await signOut(auth);
+      window._flowState.txns = [];
+      window._flowState.tags = [];
+      window._flowState.selTags = [];
+      window._flowState.currentUser = null;
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('userInfo').style.display = 'none';
+      if (window.renderAll) renderAll();
+    };
   </script>
 </head>
 <body>
@@ -666,11 +684,7 @@ function userDoc(path) { return fb().doc(fb().db, 'users', currentUser.uid, path
 function userCol(path) { return fb().collection(fb().db, 'users', currentUser.uid, path); }
 
 /* ── Auth ── */
-async function signInGoogle() {
-  const provider = new (fb().GoogleAuthProvider)();
-  try { await fb().signInWithPopup(fb().auth, provider); }
-  catch(e) { console.error('signIn error', e); alert('Login ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง'); }
-}
+// signInGoogle -> defined as window.signInGoogle in Firebase module
 async function signOutUser() {
   if (unsubTxns) { unsubTxns(); unsubTxns = null; }
   await fb().signOut(fb().auth);
