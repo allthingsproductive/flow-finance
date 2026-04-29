@@ -838,13 +838,6 @@ async function delTx(id, docId) {
 
 /* ── renderAll ── */
 function renderAll() { renderMonthStrip(); render(); renderTagMgr(); renderTagPicker(); renderWeekChart(); }
-
-let curType   = 'income';
-let curFilter = 'all';
-let activeTag = null;
-let selTags   = [];
-let monthRange = 6;
-const CATS = { income:'รายรับ', daily:'กิน/ช้อป', fixed:'ผ่อน/บัตร', saving:'ออม' };
 const SIGN = { income:'+', daily:'-', fixed:'-', saving:'→' };
 
 
