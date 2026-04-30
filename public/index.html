@@ -294,8 +294,8 @@ window.signOutUser=async function(){
         <button class="qa-sc" id="sc-yesterday" onclick="setDateShortcut('yesterday')">เมื่อวาน</button>
         <div class="qa-date-pill" id="sc-custom">
           <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="width:11px;height:11px;flex-shrink:0;color:var(--muted)"><rect x="1" y="2" width="12" height="11" rx="2"/><line x1="1" y1="5.5" x2="13" y2="5.5"/><line x1="4.5" y1="1" x2="4.5" y2="3.5"/><line x1="9.5" y1="1" x2="9.5" y2="3.5"/></svg>
-          เลือกวัน...
-          <input type="date" id="dateInp" class="qa-date-inp-real" onchange="onDatePicked()">
+          <span id="customLbl">เลือกวัน...</span>
+          <input type="date" id="dateInp" class="qa-date-inp-real">
         </div>
       </div>
       <div class="qa-autofill-hint" id="autofillHint" style="display:none"><span class="af">auto จาก tag</span> · กดที่ note เพื่อแก้</div>
@@ -434,6 +434,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const now=new Date();
   document.getElementById('hdate').textContent=now.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   setDateShortcut('today');
+  document.getElementById('dateInp').addEventListener('change', onDatePicked);
   document.getElementById('tagNewInp').addEventListener('keydown',handleTagKey);
   document.getElementById('newTagInp').addEventListener('keydown',e=>{if(e.key==='Enter')createTag();});
   document.getElementById('searchInput').addEventListener('input',render);
@@ -494,15 +495,10 @@ function onDatePicked(){
   if(dTime===yest.getTime()){ setDateShortcut('yesterday'); return; }
   const dayName=d.toLocaleDateString('th-TH',{weekday:'short'});
   const dateStr=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
-  const pill=document.getElementById('sc-custom');
-  pill.classList.add('active');
+  document.getElementById('customLbl').textContent=dayName+' '+dateStr;
+  document.getElementById('sc-custom').classList.add('active');
   document.getElementById('sc-today').classList.remove('active');
   document.getElementById('sc-yesterday').classList.remove('active');
-  const svg=pill.querySelector('svg');
-  pill.innerHTML='';
-  pill.appendChild(svg);
-  pill.insertAdjacentHTML('beforeend', dayName+' '+dateStr+'<input type="date" id="dateInp" class="qa-date-inp-real" onchange="onDatePicked()">');
-  document.getElementById('dateInp').value=val;
 }
 function updateDateLbl(){ }
 
