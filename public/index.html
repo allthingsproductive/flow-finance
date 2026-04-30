@@ -44,12 +44,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .qa-baht{font-family:'DM Mono',monospace;font-size:20px;color:var(--muted)}
 .qa-amt-inp{flex:1;border:none;background:transparent;outline:none;font-family:'DM Mono',monospace;font-size:30px;font-weight:500;color:var(--text);width:100%;min-width:0;letter-spacing:-1px}
 .qa-amt-inp::placeholder{color:var(--border)}
-.qa-note-row{display:flex;align-items:center;gap:10px;margin-bottom:0;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs)}
-.qa-note-inp{flex:1;border:none;background:transparent;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);min-width:0}
+.qa-note-row{display:flex;align-items:center;gap:0;margin-bottom:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;transition:border-color .15s,background .15s}.qa-note-row.autofilled{border-color:var(--income);background:var(--income-bg)}
+.qa-note-inp{flex:1;border:none;background:transparent;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);min-width:0;padding:10px 12px}.qa-note-inp.autofill-active{color:var(--income);font-style:italic}
 .qa-note-inp::placeholder{color:var(--muted)}
-.qa-date-badge{flex-shrink:0;border:1px solid var(--border);border-radius:100px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--bg);cursor:pointer;white-space:nowrap;position:relative;overflow:hidden}
-.qa-date-real{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2}
-#dateLbl{display:block;padding:4px 10px;pointer-events:none}
+.qa-note-divider{width:0.5px;height:20px;background:var(--border);flex-shrink:0}.qa-date-btn{display:flex;align-items:center;gap:5px;padding:0 12px;min-height:40px;background:transparent;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;flex-shrink:0;position:relative}.qa-date-btn:hover{background:var(--border-light)}.qa-date-btn svg{width:12px;height:12px;color:var(--muted)}.qa-autofill-hint{font-size:10px;color:var(--muted);padding-left:2px;margin-top:-5px;margin-bottom:10px}.qa-autofill-hint .af{color:var(--income)}
+.qa-date-real{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2;border:none;background:transparent}
+#dateLbl{pointer-events:none}
 .qa-tags-row{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:10px 0 14px;min-height:24px}
 .qa-tag-chip{padding:3px 9px;border-radius:100px;font-size:11px;cursor:pointer;background:var(--tag-bg);color:var(--tag-text);transition:all .12s;user-select:none;white-space:nowrap;line-height:1.5}
 .qa-tag-chip.on{background:var(--text);color:#fff}
@@ -279,13 +279,16 @@ window.signOutUser=async function(){
         <span class="qa-baht">฿</span>
         <input class="qa-amt-inp" type="number" id="amtInp" placeholder="0" min="0" step="any">
       </div>
-      <div class="qa-note-row">
-        <input class="qa-note-inp" type="text" id="noteInp" placeholder="รายละเอียด เช่น ข้าวเที่ยง..." maxlength="200">
-        <div class="qa-date-badge" id="dateBadge">
-          <input type="date" id="dateInp" class="qa-date-real">
+      <div class="qa-note-row" id="noteRow">
+        <input class="qa-note-inp" type="text" id="noteInp" placeholder="รายละเอียด (optional)..." maxlength="200">
+        <div class="qa-note-divider"></div>
+        <button class="qa-date-btn" type="button">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="2" width="12" height="11" rx="2"/><line x1="1" y1="5.5" x2="13" y2="5.5"/><line x1="4.5" y1="1" x2="4.5" y2="3.5"/><line x1="9.5" y1="1" x2="9.5" y2="3.5"/></svg>
           <span id="dateLbl"></span>
-        </div>
+          <input type="date" id="dateInp" class="qa-date-real">
+        </button>
       </div>
+      <div class="qa-autofill-hint" id="autofillHint" style="display:none"><span class="af">auto จาก tag</span> · กดที่ note เพื่อแก้</div>
       <div class="qa-tags-row" id="tagPicker">
         <input class="qa-tag-new" id="tagNewInp" placeholder="+ tag..." maxlength="30">
       </div>
@@ -513,10 +516,31 @@ function renderTagPicker(){
     const c=document.createElement('span');
     c.className='qa-tag-chip'+(selTags.includes(t)?' on':'');
     c.textContent=t;
-    c.onclick=()=>{selTags.includes(t)?selTags=selTags.filter(x=>x!==t):selTags.push(t);renderTagPicker();};
+    c.onclick=()=>{selTags.includes(t)?selTags=selTags.filter(x=>x!==t):selTags.push(t);renderTagPicker();updateNoteAutofill();};
     wrap.appendChild(c);
   });
   wrap.appendChild(inp);
+}
+let _noteAutofilled=false;
+function updateNoteAutofill(){
+  const noteInp=document.getElementById('noteInp');
+  const noteRow=document.getElementById('noteRow');
+  const hint=document.getElementById('autofillHint');
+  if(!noteInp||!noteRow) return;
+  if(selTags.length>0&&(_noteAutofilled||noteInp.value==='')){
+    const autoVal=selTags.join(', ');
+    noteInp.value=autoVal;
+    noteInp.classList.add('autofill-active');
+    noteRow.classList.add('autofilled');
+    hint.style.display='block';
+    _noteAutofilled=true;
+  } else if(selTags.length===0&&_noteAutofilled){
+    noteInp.value='';
+    noteInp.classList.remove('autofill-active');
+    noteRow.classList.remove('autofilled');
+    hint.style.display='none';
+    _noteAutofilled=false;
+  }
 }
 async function addTx(){
   if(!currentUser){showNotif('กรุณา Login ก่อน');return;}
@@ -524,7 +548,8 @@ async function addTx(){
   const note=document.getElementById('noteInp').value.trim();
   const date=document.getElementById('dateInp').value;
   if(!amt||amt<=0){showNotif('กรุณากรอกจำนวนเงิน');return;}
-  if(!note){showNotif('กรุณากรอกรายละเอียด');return;}
+  if(!note && selTags.length>0) note=selTags.join(', ');
+  if(!note){showNotif('กรุณากรอกรายละเอียดหรือเลือก tag');return;}
   try{
     await fb().addDoc(userCol('transactions'),{
       id:Date.now(),type:curType,amount:amt,note,date,tags:[...selTags],
