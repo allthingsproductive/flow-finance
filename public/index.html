@@ -47,7 +47,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .qa-note-row{display:flex;align-items:center;gap:0;margin-bottom:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;transition:border-color .15s,background .15s}.qa-note-row.autofilled{border-color:var(--income);background:var(--income-bg)}
 .qa-note-inp{flex:1;border:none;background:transparent;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);min-width:0;padding:10px 12px}.qa-note-inp.autofill-active{color:var(--income);font-style:italic}
 .qa-note-inp::placeholder{color:var(--muted)}
-.qa-note-divider{width:0.5px;height:20px;background:var(--border);flex-shrink:0}.qa-date-btn{display:flex;align-items:center;gap:5px;padding:0 12px;min-height:40px;background:transparent;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;flex-shrink:0;position:relative}.qa-date-btn:hover{background:var(--border-light)}.qa-date-btn svg{width:12px;height:12px;color:var(--muted)}.qa-autofill-hint{font-size:10px;color:var(--muted);padding-left:2px;margin-top:-5px;margin-bottom:10px}.qa-autofill-hint .af{color:var(--income)}
+.qa-note-divider{width:0.5px;height:20px;background:var(--border);flex-shrink:0}.qa-date-wrap{position:relative;display:flex;align-items:stretch;flex-shrink:0}.qa-date-hidden{position:absolute;bottom:0;right:0;width:1px;height:1px;opacity:0;pointer-events:none;border:none;padding:0}.qa-date-btn{display:flex;align-items:center;gap:5px;padding:0 12px;min-height:40px;background:transparent;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--text);white-space:nowrap}.qa-date-btn:hover{background:var(--border-light)}.qa-date-btn svg{width:12px;height:12px;color:var(--muted)}.qa-autofill-hint{font-size:10px;color:var(--muted);padding-left:2px;margin-top:-5px;margin-bottom:10px}.qa-autofill-hint .af{color:var(--income)}
 
 #dateLbl{pointer-events:none}
 .qa-tags-row{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:10px 0 14px;min-height:24px}
@@ -282,12 +282,14 @@ window.signOutUser=async function(){
       <div class="qa-note-row" id="noteRow">
         <input class="qa-note-inp" type="text" id="noteInp" placeholder="รายละเอียด (optional)..." maxlength="200">
         <div class="qa-note-divider"></div>
-        <button class="qa-date-btn" type="button" onclick="document.getElementById('dateInp').showPicker ? document.getElementById('dateInp').showPicker() : document.getElementById('dateInp').click()">
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="2" width="12" height="11" rx="2"/><line x1="1" y1="5.5" x2="13" y2="5.5"/><line x1="4.5" y1="1" x2="4.5" y2="3.5"/><line x1="9.5" y1="1" x2="9.5" y2="3.5"/></svg>
-          <span id="dateLbl"></span>
-        </button>
+        <div class="qa-date-wrap">
+          <input type="date" id="dateInp" class="qa-date-hidden">
+          <button class="qa-date-btn" type="button" onclick="document.getElementById('dateInp').showPicker ? document.getElementById('dateInp').showPicker() : document.getElementById('dateInp').click()">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="1" y="2" width="12" height="11" rx="2"/><line x1="1" y1="5.5" x2="13" y2="5.5"/><line x1="4.5" y1="1" x2="4.5" y2="3.5"/><line x1="9.5" y1="1" x2="9.5" y2="3.5"/></svg>
+            <span id="dateLbl"></span>
+          </button>
+        </div>
       </div>
-      <input type="date" id="dateInp" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;top:0;left:0">
       <div class="qa-autofill-hint" id="autofillHint" style="display:none"><span class="af">auto จาก tag</span> · กดที่ note เพื่อแก้</div>
       <div class="qa-tags-row" id="tagPicker">
         <input class="qa-tag-new" id="tagNewInp" placeholder="+ tag..." maxlength="30">
