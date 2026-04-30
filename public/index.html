@@ -185,6 +185,37 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .bk-bar-wrap{flex:1;margin:0 8px;height:4px;background:var(--border);border-radius:2px}
 .bk-bar-fill{height:100%;border-radius:2px}
 .bk-amt{font-family:'DM Mono',monospace;font-size:11px;color:var(--mid);white-space:nowrap}
+
+/* ── Edit Modal ── */
+.edit-overlay{position:fixed;inset:0;background:rgba(26,25,22,.35);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.edit-overlay.open{display:flex}
+.edit-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-md);width:100%;max-width:420px;overflow:hidden}
+.edit-modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border-light)}
+.edit-modal-title{font-size:13px;font-weight:500;color:var(--mid)}
+.edit-close{background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted);line-height:1;padding:2px 4px}
+.edit-body{padding:16px}
+.edit-type-bar{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:12px}
+.edit-type-btn{padding:8px 4px;border:none;border-right:1px solid var(--border);background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--muted);transition:all .12s}
+.edit-type-btn:last-child{border-right:none}
+.edit-type-btn.sel-income{background:var(--income-bg);color:var(--income)}
+.edit-type-btn.sel-daily{background:var(--daily-bg);color:var(--daily)}
+.edit-type-btn.sel-fixed{background:var(--fixed-bg);color:var(--fixed)}
+.edit-type-btn.sel-saving{background:var(--saving-bg);color:var(--saving)}
+.edit-field{margin-bottom:10px}
+.edit-field label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.edit-field input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
+.edit-field input:focus{border-color:var(--mid);background:white}
+.edit-field input[type=number]{font-family:'DM Mono',monospace}
+.edit-tag-picker{display:flex;flex-wrap:wrap;gap:4px;padding:6px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);min-height:34px;cursor:text}
+.edit-tag-chip{padding:2px 8px;border-radius:100px;font-size:11px;cursor:pointer;user-select:none}
+.edit-tag-chip.off{background:var(--tag-bg);color:var(--tag-text)}
+.edit-tag-chip.on{background:var(--text);color:white}
+.edit-actions{display:flex;gap:8px;margin-top:14px}
+.edit-save{flex:1;padding:9px;border-radius:var(--rs);border:none;background:var(--text);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+.edit-save:hover{opacity:.85}
+.edit-del{padding:9px 14px;border-radius:var(--rs);border:1px solid var(--border);background:transparent;color:var(--daily);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
+.edit-del:hover{background:var(--daily-bg)}
+@media(max-width:680px){.edit-overlay{align-items:flex-end;padding:0}.edit-modal{border-radius:var(--r) var(--r) 0 0;max-width:100%}}
 footer{padding:18px 0 12px;text-align:center;font-size:10px;color:var(--muted);border-top:1px solid var(--border);margin-top:20px}
 .notif{position:fixed;bottom:20px;right:20px;background:var(--text);color:#fff;padding:9px 14px;border-radius:var(--r);font-size:12px;box-shadow:var(--sh-md);transform:translateY(60px);opacity:0;transition:all .2s;z-index:999}
 .notif.show{transform:translateY(0);opacity:1}
@@ -225,12 +256,12 @@ footer{padding:18px 0 12px;text-align:center;font-size:10px;color:var(--muted);b
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,collection,doc,addDoc,deleteDoc,getDocs,query,orderBy,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,collection,doc,addDoc,deleteDoc,updateDoc,getDocs,query,orderBy,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 const cfg={apiKey:"AIzaSyACGexhjBhe7BZQOaI-ut66SXqG7vUh4ag",authDomain:"flow-finance-927ae.firebaseapp.com",projectId:"flow-finance-927ae",storageBucket:"flow-finance-927ae.firebasestorage.app",messagingSenderId:"270362085632",appId:"1:270362085632:web:849ad2557606f624954be5"};
 const app=initializeApp(cfg);
 const auth=getAuth(app);
 const db=getFirestore(app);
-window._fb={auth,db,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged,collection,doc,addDoc,deleteDoc,getDocs,query,orderBy,onSnapshot};
+window._fb={auth,db,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged,collection,doc,addDoc,deleteDoc,updateDoc,getDocs,query,orderBy,onSnapshot};
 window.signInGoogle=async function(){
   try{await signInWithPopup(auth,new GoogleAuthProvider());}
   catch(e){console.error(e);alert('Login ไม่สำเร็จ กรุณาลองใหม่');}
@@ -416,6 +447,44 @@ function doPost(e){
   <div class="breakdown-grid" id="breakdownGrid"></div>
 </div>
 
+
+<!-- Edit Modal -->
+<div class="edit-overlay" id="editOverlay" onclick="closeEdit(event)">
+  <div class="edit-modal" onclick="event.stopPropagation()">
+    <div class="edit-modal-header">
+      <span class="edit-modal-title">แก้ไขรายการ</span>
+      <button class="edit-close" onclick="closeEditModal()">×</button>
+    </div>
+    <div class="edit-body">
+      <div class="edit-type-bar">
+        <button class="edit-type-btn" id="et-income" onclick="setEditType('income')">↑ รายรับ</button>
+        <button class="edit-type-btn" id="et-daily"  onclick="setEditType('daily')">🍜 กิน/ช้อป</button>
+        <button class="edit-type-btn" id="et-fixed"  onclick="setEditType('fixed')">💳 ผ่อน/บัตร</button>
+        <button class="edit-type-btn" id="et-saving" onclick="setEditType('saving')">🏦 ออม</button>
+      </div>
+      <div class="edit-field">
+        <label>จำนวน (บาท)</label>
+        <input type="number" id="editAmt" min="0" step="any">
+      </div>
+      <div class="edit-field">
+        <label>รายละเอียด</label>
+        <input type="text" id="editNote" maxlength="200">
+      </div>
+      <div class="edit-field">
+        <label>วันที่</label>
+        <input type="date" id="editDate">
+      </div>
+      <div class="edit-field">
+        <label>Tags</label>
+        <div class="edit-tag-picker" id="editTagPicker"></div>
+      </div>
+      <div class="edit-actions">
+        <button class="edit-del" onclick="deleteCurrentEdit()">ลบรายการ</button>
+        <button class="edit-save" onclick="saveEdit()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
 <footer>flow. — Firebase edition &nbsp;·&nbsp; made with ♥</footer>
 </div>
 <div class="notif" id="notif"></div>
@@ -655,7 +724,7 @@ function render(){
     const lbl=d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
     return (i>0?'<div class="divider"></div>':'')+
       '<div class="day-header"><span class="day-label">'+lbl+'</span><span class="day-total" style="color:'+(net>=0?'var(--income)':'var(--daily)')+'">'+f(net,true)+' ฿</span></div>'+
-      items.map(t=>'<div class="tx-row">'+
+      items.map(t=>'<div class="tx-row" onclick="openEditById('+JSON.stringify(t.id)+')">'+
         '<div class="tx-dot '+t.type+'"></div>'+
         '<div class="tx-info"><div class="tx-note">'+esc(t.note)+'</div>'+
         '<div class="tx-meta"><span class="tx-time">'+esc(t.time||'')+'</span>'+
@@ -715,6 +784,87 @@ function renderBreakdown(){
 }
 
 /* ── Utils ── */
+
+/* ── Edit ── */
+let editTx = null;
+let editType = 'income';
+let editSelTags = [];
+
+function openEdit(tx) {
+  editTx = tx;
+  editType = tx.type;
+  editSelTags = [...(tx.tags || [])];
+  // set type bar
+  setEditType(tx.type);
+  document.getElementById('editAmt').value = tx.amount;
+  document.getElementById('editNote').value = tx.note;
+  document.getElementById('editDate').value = tx.date;
+  renderEditTagPicker();
+  document.getElementById('editOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditModal() {
+  document.getElementById('editOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  editTx = null;
+}
+
+function closeEdit(e) {
+  if (e.target === document.getElementById('editOverlay')) closeEditModal();
+}
+
+function setEditType(t) {
+  editType = t;
+  ['income','daily','fixed','saving'].forEach(k => {
+    document.getElementById('et-' + k).className = 'edit-type-btn' + (k === t ? ' sel-' + k : '');
+  });
+}
+
+function renderEditTagPicker() {
+  const wrap = document.getElementById('editTagPicker');
+  wrap.innerHTML = '';
+  tags.forEach(t => {
+    const c = document.createElement('span');
+    c.className = 'edit-tag-chip ' + (editSelTags.includes(t) ? 'on' : 'off');
+    c.textContent = t;
+    c.onclick = () => {
+      editSelTags.includes(t) ? editSelTags = editSelTags.filter(x => x !== t) : editSelTags.push(t);
+      renderEditTagPicker();
+    };
+    wrap.appendChild(c);
+  });
+}
+
+async function saveEdit() {
+  if (!editTx || !currentUser) return;
+  const amt = parseFloat(document.getElementById('editAmt').value);
+  const note = document.getElementById('editNote').value.trim();
+  const date = document.getElementById('editDate').value;
+  if (!amt || amt <= 0) { showNotif('กรุณากรอกจำนวนเงิน'); return; }
+  if (!note) { showNotif('กรุณากรอกรายละเอียด'); return; }
+  try {
+    const ref = fb().doc(fb().db, 'users', currentUser.uid, 'transactions', editTx._docId);
+    await fb().updateDoc ? 
+      fb().updateDoc(ref, { type: editType, amount: amt, note, date, tags: [...editSelTags] }) :
+      (await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js')).updateDoc(ref, { type: editType, amount: amt, note, date, tags: [...editSelTags] });
+    closeEditModal();
+    showNotif('✓ แก้ไขแล้ว');
+  } catch(e) { console.error(e); showNotif('แก้ไขไม่สำเร็จ กรุณาลองใหม่'); }
+}
+
+async function deleteCurrentEdit() {
+  if (!editTx || !confirm('ลบรายการนี้?')) return;
+  try {
+    await fb().deleteDoc(fb().doc(fb().db, 'users', currentUser.uid, 'transactions', editTx._docId));
+    closeEditModal();
+    showNotif('ลบแล้ว');
+  } catch(e) { showNotif('ลบไม่สำเร็จ'); }
+}
+function openEditById(id) {
+  const tx = txns.find(t => t.id === id);
+  if (tx) openEdit(tx);
+}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 function sum(arr,type){return arr.filter(t=>t.type===type).reduce((s,t)=>s+t.amount,0);}
 function cnt(arr,type){return arr.filter(t=>t.type===type).length;}
