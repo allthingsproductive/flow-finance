@@ -51,7 +51,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .qa-sc{padding:4px 11px;border-radius:100px;border:1px dashed var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap}
 .qa-sc:hover{border-color:var(--mid);color:var(--mid)}
 .qa-sc.active{border-style:solid;border-color:var(--text);color:var(--text);background:var(--bg)}
-.qa-date-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 11px 5px 9px;border-radius:100px;border:1px dashed var(--border);background:transparent;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--muted);transition:all .12s;white-space:nowrap}
+.qa-date-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 11px 5px 9px;border-radius:100px;border:1px dashed var(--border);background:transparent;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--muted);transition:all .12s;white-space:nowrap;user-select:none;-webkit-user-select:none}
+.qa-date-native{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;border:none;padding:0;margin:0;top:-9999px;left:-9999px}
 .qa-date-pill:hover{border-color:var(--mid);color:var(--mid)}
 .qa-date-pill.active{border-style:solid;border-color:var(--text);color:var(--text);background:var(--bg)}
 .qa-autofill-hint{font-size:10px;color:var(--muted);padding-left:2px;margin-top:-5px;margin-bottom:10px}.qa-autofill-hint .af{color:var(--income)}
@@ -324,11 +325,11 @@ window.signOutUser=async function(){
       <div class="qa-date-row">
         <button class="qa-sc" id="sc-today" onclick="setDateShortcut('today')"></button>
         <button class="qa-sc" id="sc-yesterday" onclick="setDateShortcut('yesterday')">เมื่อวาน</button>
-        <button class="qa-date-pill" id="sc-custom" type="button" onclick="document.getElementById('dateInp').showPicker ? document.getElementById('dateInp').showPicker() : document.getElementById('dateInp').click()">
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="width:11px;height:11px;flex-shrink:0"><rect x="1" y="2" width="12" height="11" rx="2"/><line x1="1" y1="5.5" x2="13" y2="5.5"/><line x1="4.5" y1="1" x2="4.5" y2="3.5"/><line x1="9.5" y1="1" x2="9.5" y2="3.5"/></svg>
-          <span id="customLbl">เลือกวัน...</span>
-        </button>
-        <input type="date" id="dateInp" style="position:fixed;opacity:0;pointer-events:none;width:0;height:0">
+        <label class="qa-date-pill" id="sc-custom" for="dateInp">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="width:11px;height:11px;flex-shrink:0;pointer-events:none"><rect x="1" y="2" width="12" height="11" rx="2"/><line x1="1" y1="5.5" x2="13" y2="5.5"/><line x1="4.5" y1="1" x2="4.5" y2="3.5"/><line x1="9.5" y1="1" x2="9.5" y2="3.5"/></svg>
+          <span id="customLbl" style="pointer-events:none">เลือกวัน...</span>
+        </label>
+        <input type="date" id="dateInp" class="qa-date-native">
       </div>
       <div class="qa-autofill-hint" id="autofillHint" style="display:none"><span class="af">auto จาก tag</span> · กดที่ note เพื่อแก้</div>
       <div class="qa-tags-row" id="tagPicker">
