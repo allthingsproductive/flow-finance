@@ -190,15 +190,15 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 
 /* ── Custom Date Picker ── */
 .dp-wrap{position:relative;display:inline-block}
-.dp-dropdown{position:absolute;top:calc(100% + 6px);left:0;z-index:200;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-md);padding:12px;width:240px;display:none}
+.dp-dropdown{position:absolute;top:calc(100% + 6px);left:0;z-index:200;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-md);padding:12px 10px;width:224px;display:none}
 .dp-dropdown.open{display:block}
 .dp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .dp-month-lbl{font-size:12px;font-weight:500;color:var(--text)}
 .dp-nav{background:none;border:none;cursor:pointer;color:var(--mid);font-size:16px;padding:2px 6px;border-radius:var(--rs);line-height:1}
 .dp-nav:hover{background:var(--bg)}
-.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.dp-day-name{font-size:9px;color:var(--muted);text-align:center;padding:2px 0;font-weight:500}
-.dp-day{font-size:11px;text-align:center;padding:5px 2px;border-radius:var(--rs);cursor:pointer;color:var(--text);border:none;background:none;width:100%}
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;justify-items:center}
+.dp-day-name{font-size:9px;color:var(--muted);text-align:center;padding:4px 0 6px;font-weight:500}
+.dp-day{font-size:11px;text-align:center;padding:0;height:28px;width:28px;border-radius:100px;cursor:pointer;color:var(--text);border:none;background:none;display:flex;align-items:center;justify-content:center;margin:0 auto}
 .dp-day:hover{background:var(--bg)}
 .dp-day.today{color:var(--income);font-weight:600}
 .dp-day.selected{background:var(--text);color:white;border-radius:100px}
@@ -233,7 +233,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .edit-save:hover{opacity:.85}
 .edit-del{padding:9px 14px;border-radius:var(--rs);border:1px solid var(--border);background:transparent;color:var(--daily);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
 .edit-del:hover{background:var(--daily-bg)}
-@media(max-width:680px){.edit-overlay{align-items:flex-end;padding:0}.edit-modal{border-radius:var(--r) var(--r) 0 0;max-width:100%}}
+@media(max-width:680px){.edit-overlay{align-items:flex-end;padding:0}.edit-modal{border-radius:var(--r) var(--r) 0 0;max-width:100%}.dp-dropdown{position:fixed;bottom:0;left:0;right:0;width:100%;border-radius:var(--r) var(--r) 0 0;padding:16px 16px 32px;top:auto}}
 footer{padding:18px 0 12px;text-align:center;font-size:10px;color:var(--muted);border-top:1px solid var(--border);margin-top:20px}
 .notif{position:fixed;bottom:20px;right:20px;background:var(--text);color:#fff;padding:9px 14px;border-radius:var(--r);font-size:12px;box-shadow:var(--sh-md);transform:translateY(60px);opacity:0;transition:all .2s;z-index:999}
 .notif.show{transform:translateY(0);opacity:1}
@@ -586,6 +586,7 @@ function dpNav(dir){
 
 function renderDpGrid(){
   const now = new Date();
+  const todayStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
   const selected = document.getElementById('dateInp').value;
   const yr = dpCurrentDate.getFullYear();
   const mo = dpCurrentDate.getMonth();
@@ -594,19 +595,26 @@ function renderDpGrid(){
   const grid = document.getElementById('dpGrid');
   const dayNames = ['อา','จ','อ','พ','พฤ','ศ','ส'];
   let html = dayNames.map(d=>'<div class="dp-day-name">'+d+'</div>').join('');
-  const firstDay = new Date(yr,mo,1).getDay();
+  const firstDay = new Date(yr,mo,1).getDay(); // 0=Sun
   const daysInMonth = new Date(yr,mo+1,0).getDate();
   const prevDays = new Date(yr,mo,0).getDate();
-  // prev month filler
-  for(let i=firstDay-1;i>=0;i--){
-    html += '<button class="dp-day other-month" onclick="dpPickDay('+(yr)+','+(mo-1)+','+(prevDays-i)+')">'+( prevDays-i)+'</button>';
+  // prev month filler (firstDay cells)
+  for(let i=0;i<firstDay;i++){
+    const pd = prevDays - firstDay + 1 + i;
+    html += '<button class="dp-day other-month" onclick="dpPickDay('+yr+','+(mo-1)+','+pd+')">'+pd+'</button>';
   }
-  // current month
+  // current month days
   for(let d=1;d<=daysInMonth;d++){
     const dateStr = yr+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const isToday = dateStr === now.toISOString().slice(0,10);
+    const isToday = dateStr === todayStr;
     const isSel = dateStr === selected;
     html += '<button class="dp-day'+(isToday?' today':'')+(isSel?' selected':'')+'" onclick="dpPickDay('+yr+','+mo+','+d+')">'+d+'</button>';
+  }
+  // next month filler to complete last row
+  const total = firstDay + daysInMonth;
+  const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for(let d=1;d<=remaining;d++){
+    html += '<button class="dp-day other-month" onclick="dpPickDay('+yr+','+(mo+1)+','+d+')">'+d+'</button>';
   }
   grid.innerHTML = html;
 }
