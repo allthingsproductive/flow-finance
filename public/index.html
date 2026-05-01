@@ -52,7 +52,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .qa-sc:hover{border-color:var(--mid);color:var(--mid)}
 .qa-sc.active{border-style:solid;border-color:var(--text);color:var(--text);background:var(--bg)}
 .qa-date-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 11px 5px 9px;border-radius:100px;border:1px dashed var(--border);background:transparent;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--muted);transition:all .12s;white-space:nowrap;user-select:none;-webkit-user-select:none}
-.qa-date-native{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;border:none;padding:0;margin:0;top:-9999px;left:-9999px}
+
 .qa-date-pill:hover{border-color:var(--mid);color:var(--mid)}
 .qa-date-pill.active{border-style:solid;border-color:var(--text);color:var(--text);background:var(--bg)}
 .qa-autofill-hint{font-size:10px;color:var(--muted);padding-left:2px;margin-top:-5px;margin-bottom:10px}.qa-autofill-hint .af{color:var(--income)}
@@ -187,6 +187,23 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .bk-bar-fill{height:100%;border-radius:2px}
 .bk-amt{font-family:'DM Mono',monospace;font-size:11px;color:var(--mid);white-space:nowrap}
 
+
+/* ── Custom Date Picker ── */
+.dp-wrap{position:relative;display:inline-block}
+.dp-dropdown{position:absolute;top:calc(100% + 6px);left:0;z-index:200;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-md);padding:12px;width:240px;display:none}
+.dp-dropdown.open{display:block}
+.dp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dp-month-lbl{font-size:12px;font-weight:500;color:var(--text)}
+.dp-nav{background:none;border:none;cursor:pointer;color:var(--mid);font-size:16px;padding:2px 6px;border-radius:var(--rs);line-height:1}
+.dp-nav:hover{background:var(--bg)}
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.dp-day-name{font-size:9px;color:var(--muted);text-align:center;padding:2px 0;font-weight:500}
+.dp-day{font-size:11px;text-align:center;padding:5px 2px;border-radius:var(--rs);cursor:pointer;color:var(--text);border:none;background:none;width:100%}
+.dp-day:hover{background:var(--bg)}
+.dp-day.today{color:var(--income);font-weight:600}
+.dp-day.selected{background:var(--text);color:white;border-radius:100px}
+.dp-day.other-month{color:var(--border)}
+.dp-day:empty{cursor:default}
 /* ── Edit Modal ── */
 .edit-overlay{position:fixed;inset:0;background:rgba(26,25,22,.35);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .edit-overlay.open{display:flex}
@@ -325,11 +342,21 @@ window.signOutUser=async function(){
       <div class="qa-date-row">
         <button class="qa-sc" id="sc-today" onclick="setDateShortcut('today')"></button>
         <button class="qa-sc" id="sc-yesterday" onclick="setDateShortcut('yesterday')">เมื่อวาน</button>
-        <label class="qa-date-pill" id="sc-custom" for="dateInp">
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="width:11px;height:11px;flex-shrink:0;pointer-events:none"><rect x="1" y="2" width="12" height="11" rx="2"/><line x1="1" y1="5.5" x2="13" y2="5.5"/><line x1="4.5" y1="1" x2="4.5" y2="3.5"/><line x1="9.5" y1="1" x2="9.5" y2="3.5"/></svg>
-          <span id="customLbl" style="pointer-events:none">เลือกวัน...</span>
-        </label>
-        <input type="date" id="dateInp" class="qa-date-native">
+        <div class="dp-wrap">
+          <button class="qa-date-pill" id="sc-custom" type="button" onclick="toggleDatePicker()">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="width:11px;height:11px;flex-shrink:0"><rect x="1" y="2" width="12" height="11" rx="2"/><line x1="1" y1="5.5" x2="13" y2="5.5"/><line x1="4.5" y1="1" x2="4.5" y2="3.5"/><line x1="9.5" y1="1" x2="9.5" y2="3.5"/></svg>
+            <span id="customLbl">เลือกวัน...</span>
+          </button>
+          <div class="dp-dropdown" id="dpDropdown">
+            <div class="dp-header">
+              <button class="dp-nav" onclick="dpNav(-1)">&#8249;</button>
+              <span class="dp-month-lbl" id="dpMonthLbl"></span>
+              <button class="dp-nav" onclick="dpNav(1)">&#8250;</button>
+            </div>
+            <div class="dp-grid" id="dpGrid"></div>
+          </div>
+        </div>
+        <input type="hidden" id="dateInp" value="">
       </div>
       <div class="qa-autofill-hint" id="autofillHint" style="display:none"><span class="af">auto จาก tag</span> · กดที่ note เพื่อแก้</div>
       <div class="qa-tags-row" id="tagPicker">
@@ -505,7 +532,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   const now=new Date();
   document.getElementById('hdate').textContent=now.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   setDateShortcut('today');
-  document.getElementById('dateInp').addEventListener('change', onDatePicked);
+  document.addEventListener('click', e=>{
+    const dp = document.getElementById('dpDropdown');
+    const wrap = dp ? dp.closest('.dp-wrap') : null;
+    if(dp && dp.classList.contains('open') && wrap && !wrap.contains(e.target)) closeDatePicker();
+  });
   document.getElementById('tagNewInp').addEventListener('keydown',handleTagKey);
   document.getElementById('newTagInp').addEventListener('keydown',e=>{if(e.key==='Enter')createTag();});
   document.getElementById('searchInput').addEventListener('input',render);
@@ -532,46 +563,101 @@ document.addEventListener('DOMContentLoaded',()=>{
   waitForFb();
 });
 
+/* ── Custom Date Picker Logic ── */
+let dpCurrentDate = new Date();
+
+function toggleDatePicker(){
+  const dd = document.getElementById('dpDropdown');
+  if(dd.classList.contains('open')){ dd.classList.remove('open'); return; }
+  const val = document.getElementById('dateInp').value;
+  dpCurrentDate = val ? new Date(val+'T00:00:00') : new Date();
+  renderDpGrid();
+  dd.classList.add('open');
+}
+
+function closeDatePicker(){
+  document.getElementById('dpDropdown').classList.remove('open');
+}
+
+function dpNav(dir){
+  dpCurrentDate.setMonth(dpCurrentDate.getMonth() + dir);
+  renderDpGrid();
+}
+
+function renderDpGrid(){
+  const now = new Date();
+  const selected = document.getElementById('dateInp').value;
+  const yr = dpCurrentDate.getFullYear();
+  const mo = dpCurrentDate.getMonth();
+  document.getElementById('dpMonthLbl').textContent =
+    new Date(yr,mo,1).toLocaleDateString('th-TH',{month:'long',year:'numeric'});
+  const grid = document.getElementById('dpGrid');
+  const dayNames = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  let html = dayNames.map(d=>'<div class="dp-day-name">'+d+'</div>').join('');
+  const firstDay = new Date(yr,mo,1).getDay();
+  const daysInMonth = new Date(yr,mo+1,0).getDate();
+  const prevDays = new Date(yr,mo,0).getDate();
+  // prev month filler
+  for(let i=firstDay-1;i>=0;i--){
+    html += '<button class="dp-day other-month" onclick="dpPickDay('+(yr)+','+(mo-1)+','+(prevDays-i)+')">'+( prevDays-i)+'</button>';
+  }
+  // current month
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr = yr+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const isToday = dateStr === now.toISOString().slice(0,10);
+    const isSel = dateStr === selected;
+    html += '<button class="dp-day'+(isToday?' today':'')+(isSel?' selected':'')+'" onclick="dpPickDay('+yr+','+mo+','+d+')">'+d+'</button>';
+  }
+  grid.innerHTML = html;
+}
+
+function dpPickDay(yr, mo, d){
+  const date = new Date(yr, mo, d);
+  const val = date.toISOString().slice(0,10);
+  document.getElementById('dateInp').value = val;
+  closeDatePicker();
+  onDatePicked();
+}
+
 function setDateShortcut(mode){
-  const today=new Date();
-  const d=new Date(today);
+  const today = new Date();
+  const d = new Date(today);
   if(mode==='yesterday') d.setDate(d.getDate()-1);
-  const val=d.toISOString().slice(0,10);
-  document.getElementById('dateInp').value=val;
-  const dayName=d.toLocaleDateString('th-TH',{weekday:'short'});
-  const dateStr=d.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+  document.getElementById('dateInp').value = d.toISOString().slice(0,10);
+  const dayName = d.toLocaleDateString('th-TH',{weekday:'short'});
+  const dateStr = d.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+  closeDatePicker();
   if(mode==='today'){
     document.getElementById('sc-today').textContent='วันนี้ · '+dayName+' '+dateStr;
     document.getElementById('sc-today').classList.add('active');
     document.getElementById('sc-yesterday').classList.remove('active');
     document.getElementById('sc-custom').classList.remove('active');
-  } else if(mode==='yesterday'){
+  } else {
     document.getElementById('sc-yesterday').textContent='เมื่อวาน · '+dayName+' '+dateStr;
     document.getElementById('sc-yesterday').classList.add('active');
     document.getElementById('sc-today').classList.remove('active');
     document.getElementById('sc-custom').classList.remove('active');
-    const todayEl=document.getElementById('sc-today');
     const td=new Date();
-    todayEl.textContent='วันนี้ · '+td.toLocaleDateString('th-TH',{weekday:'short'})+' '+td.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+    document.getElementById('sc-today').textContent='วันนี้ · '+td.toLocaleDateString('th-TH',{weekday:'short'})+' '+td.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
   }
 }
+
 function onDatePicked(){
-  const val=document.getElementById('dateInp').value;
+  const val = document.getElementById('dateInp').value;
   if(!val) return;
-  const d=new Date(val+'T00:00:00');
-  const today=new Date(); today.setHours(0,0,0,0);
-  const yest=new Date(today); yest.setDate(today.getDate()-1);
-  const dTime=d.getTime();
-  if(dTime===today.getTime()){ setDateShortcut('today'); return; }
-  if(dTime===yest.getTime()){ setDateShortcut('yesterday'); return; }
-  const dayName=d.toLocaleDateString('th-TH',{weekday:'short'});
-  const dateStr=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
-  document.getElementById('customLbl').textContent=dayName+' '+dateStr;
+  const d = new Date(val+'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const yest = new Date(today); yest.setDate(today.getDate()-1);
+  if(d.getTime()===today.getTime()){ setDateShortcut('today'); return; }
+  if(d.getTime()===yest.getTime()){ setDateShortcut('yesterday'); return; }
+  const dayName = d.toLocaleDateString('th-TH',{weekday:'short'});
+  const dateStr = d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+  document.getElementById('customLbl').textContent = dayName+' '+dateStr;
   document.getElementById('sc-custom').classList.add('active');
   document.getElementById('sc-today').classList.remove('active');
   document.getElementById('sc-yesterday').classList.remove('active');
 }
-function updateDateLbl(){ }
+function updateDateLbl(){}
 
 /* ── Load data ── */
 async function loadUserData(){
