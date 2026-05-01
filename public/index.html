@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F7F6F3;--surface:#fff;--border:#E8E6E1;--border-light:#F0EEE9;--text:#1A1916;--mid:#6B6860;--muted:#A09D97;--income:#2D6A4F;--income-bg:#E8F5EE;--daily:#C44B3B;--daily-bg:#FBF0EE;--fixed:#8B5E3C;--fixed-bg:#F7F0E8;--saving:#3A6EA8;--saving-bg:#EBF0F8;--tag-bg:#EEECEA;--tag-text:#5A5750;--sh:0 1px 3px rgba(0,0,0,.06);--sh-md:0 4px 16px rgba(0,0,0,.1);--r:8px;--rs:5px}
+:root{--bg:#F7F6F3;--surface:#fff;--border:#E8E6E1;--border-light:#F0EEE9;--text:#1A1916;--mid:#6B6860;--muted:#A09D97;--income:#2D6A4F;--income-bg:#E8F5EE;--daily:#C44B3B;--daily-bg:#FBF0EE;--fixed:#8B5E3C;--fixed-bg:#F7F0E8;--saving:#3A6EA8;--saving-bg:#EBF0F8;--tag-bg:#EEECEA;--tag-text:#5A5750;--utility:#6B46C1;--utility-bg:#F5F3FF;--travel:#0369A1;--travel-bg:#EFF6FF;--sh:0 1px 3px rgba(0,0,0,.06);--sh-md:0 4px 16px rgba(0,0,0,.1);--r:8px;--rs:5px}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
 .app{max-width:960px;margin:0 auto;padding:0 20px 48px}
 header{display:flex;align-items:center;justify-content:space-between;padding:26px 0 0}
@@ -30,7 +30,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 
 /* Quick add */
 .quick-add{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px}
-.type-bar{display:grid;grid-template-columns:repeat(4,1fr)}
+.type-bar{display:grid;grid-template-columns:repeat(3,1fr)}.type-bar .type-bar-btn:nth-child(-n+3){border-bottom:1px solid var(--border)}
 .type-bar-btn{padding:14px 4px 12px;border:none;border-bottom:1px solid var(--border);border-right:1px solid var(--border);background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:5px;transition:background .12s,color .12s;position:relative}
 .type-bar-btn:last-child{border-right:none}
 .type-bar-btn .tbi{font-size:18px;line-height:1}
@@ -39,6 +39,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .type-bar-btn.sel-daily{background:var(--daily-bg);color:var(--daily)}.type-bar-btn.sel-daily::after{background:var(--daily)}
 .type-bar-btn.sel-fixed{background:var(--fixed-bg);color:var(--fixed)}.type-bar-btn.sel-fixed::after{background:var(--fixed)}
 .type-bar-btn.sel-saving{background:var(--saving-bg);color:var(--saving)}.type-bar-btn.sel-saving::after{background:var(--saving)}
+.type-bar-btn.sel-utility{background:var(--utility-bg);color:var(--utility)}.type-bar-btn.sel-utility::after{background:var(--utility)}
+.type-bar-btn.sel-travel{background:var(--travel-bg);color:var(--travel)}.type-bar-btn.sel-travel::after{background:var(--travel)}
 .qa-body{padding:16px 18px 18px;overflow:visible}
 .qa-amount-row{display:flex;align-items:baseline;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--border-light);padding-bottom:14px}
 .qa-baht{font-family:'DM Mono',monospace;font-size:20px;color:var(--muted)}
@@ -86,6 +88,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .fc-daily.active{background:var(--daily);color:#fff;border-color:var(--daily)}
 .fc-fixed.active{background:var(--fixed);color:#fff;border-color:var(--fixed)}
 .fc-saving.active{background:var(--saving);color:#fff;border-color:var(--saving)}
+.fc-travel.active{background:var(--travel);color:#fff;border-color:var(--travel)}
+.fc-utility.active{background:var(--utility);color:#fff;border-color:var(--utility)}
 .search-input{padding:3px 9px;border-radius:100px;font-size:11px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;width:110px;outline:none}
 .tx-list-scroll{max-height:480px;overflow-y:auto}
 .tx-list-scroll::-webkit-scrollbar{width:3px}
@@ -97,16 +101,16 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .tx-row:hover{background:var(--bg)}
 .tx-row:last-child{border-bottom:none}
 .tx-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.tx-dot.income{background:var(--income)}.tx-dot.daily{background:var(--daily)}.tx-dot.fixed{background:var(--fixed)}.tx-dot.saving{background:var(--saving)}
+.tx-dot.income{background:var(--income)}.tx-dot.daily{background:var(--daily)}.tx-dot.travel{background:var(--travel)}.tx-dot.fixed{background:var(--fixed)}.tx-dot.utility{background:var(--utility)}.tx-dot.saving{background:var(--saving)}
 .tx-info{flex:1;min-width:0}
 .tx-note{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx-meta{display:flex;align-items:center;gap:4px;margin-top:2px;flex-wrap:wrap}
 .tx-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
 .badge{padding:1px 5px;border-radius:3px;font-size:9px;font-weight:500}
-.badge.income{background:var(--income-bg);color:var(--income)}.badge.daily{background:var(--daily-bg);color:var(--daily)}.badge.fixed{background:var(--fixed-bg);color:var(--fixed)}.badge.saving{background:var(--saving-bg);color:var(--saving)}
+.badge.income{background:var(--income-bg);color:var(--income)}.badge.daily{background:var(--daily-bg);color:var(--daily)}.badge.travel{background:var(--travel-bg);color:var(--travel)}.badge.fixed{background:var(--fixed-bg);color:var(--fixed)}.badge.utility{background:var(--utility-bg);color:var(--utility)}.badge.saving{background:var(--saving-bg);color:var(--saving)}
 .tag{padding:1px 5px;border-radius:3px;background:var(--tag-bg);color:var(--tag-text);font-size:10px}
 .tx-amount{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;white-space:nowrap}
-.tx-amount.income{color:var(--income)}.tx-amount.daily{color:var(--daily)}.tx-amount.fixed{color:var(--fixed)}.tx-amount.saving{color:var(--saving)}
+.tx-amount.income{color:var(--income)}.tx-amount.daily{color:var(--daily)}.tx-amount.travel{color:var(--travel)}.tx-amount.fixed{color:var(--fixed)}.tx-amount.utility{color:var(--utility)}.tx-amount.saving{color:var(--saving)}
 .tx-delete{opacity:0;background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:2px 4px;border-radius:3px;transition:all .15s}
 .tx-row:hover .tx-delete{opacity:1}
 .tx-delete:hover{background:var(--daily-bg);color:var(--daily)}
@@ -295,7 +299,9 @@ window.signOutUser=async function(){
     <div class="type-bar">
       <button class="type-bar-btn sel-income" id="btn-income" onclick="setType('income')"><span class="tbi">↑</span>รายรับ</button>
       <button class="type-bar-btn" id="btn-daily" onclick="setType('daily')"><span class="tbi">🍜</span>กิน / ช้อป</button>
+      <button class="type-bar-btn" id="btn-travel" onclick="setType('travel')"><span class="tbi">🚗</span>เดินทาง</button>
       <button class="type-bar-btn" id="btn-fixed" onclick="setType('fixed')"><span class="tbi">💳</span>ผ่อน / บัตร</button>
+      <button class="type-bar-btn" id="btn-utility" onclick="setType('utility')"><span class="tbi">🏠</span>Utility</button>
       <button class="type-bar-btn" id="btn-saving" onclick="setType('saving')"><span class="tbi">🏦</span>ออม / เตรียม</button>
     </div>
     <div class="qa-body">
@@ -338,7 +344,9 @@ window.signOutUser=async function(){
   <div class="month-strip">
     <div class="ms-seg"><div class="ms-label">รายรับ</div><div class="ms-val" style="color:var(--income)" id="msIncome">฿0</div><div class="ms-sub" id="msISub">0 รายการ</div></div>
     <div class="ms-seg"><div class="ms-label">🍜 กิน/ช้อป</div><div class="ms-val" style="color:var(--daily)" id="msDaily">฿0</div><div class="ms-sub" id="msDSub">0 รายการ</div></div>
-    <div class="ms-seg"><div class="ms-label">💳 รายจ่ายอื่น</div><div class="ms-val" style="color:var(--fixed)" id="msFixed">฿0</div><div class="ms-sub" id="msFSub">0 รายการ</div></div>
+    <div class="ms-seg"><div class="ms-label">🚗 เดินทาง</div><div class="ms-val" style="color:var(--travel)" id="msTravel">฿0</div><div class="ms-sub" id="msTSub">0 รายการ</div></div>
+    <div class="ms-seg"><div class="ms-label">💳 ผ่อน/บัตร</div><div class="ms-val" style="color:var(--fixed)" id="msFixed">฿0</div><div class="ms-sub" id="msFSub">0 รายการ</div></div>
+    <div class="ms-seg"><div class="ms-label">🏠 Utility</div><div class="ms-val" style="color:var(--utility)" id="msUtility">฿0</div><div class="ms-sub" id="msUSub">0 รายการ</div></div>
     <div class="ms-seg"><div class="ms-label">🏦 ออม</div><div class="ms-val" style="color:var(--saving)" id="msSaving">฿0</div><div class="ms-sub" id="msSSub">0 รายการ</div></div>
     <div class="ms-seg" style="text-align:right;border-right:none"><div class="ms-label">เหลือจริง</div><div class="ms-val" id="msNet">฿0</div><div class="ms-sub" id="msNetSub">เดือนนี้</div></div>
   </div>
@@ -354,7 +362,9 @@ window.signOutUser=async function(){
           <button class="filter-chip fc-all active" onclick="setFilter('all',this)">ทั้งหมด</button>
           <button class="filter-chip fc-income" onclick="setFilter('income',this)">↑ รายรับ</button>
           <button class="filter-chip fc-daily" onclick="setFilter('daily',this)">🍜 กิน/ช้อป</button>
-          <button class="filter-chip fc-fixed" onclick="setFilter('fixed',this)">💳 รายจ่ายอื่น</button>
+          <button class="filter-chip fc-travel" onclick="setFilter('travel',this)">🚗 เดินทาง</button>
+          <button class="filter-chip fc-fixed" onclick="setFilter('fixed',this)">💳 ผ่อน/บัตร</button>
+          <button class="filter-chip fc-utility" onclick="setFilter('utility',this)">🏠 Utility</button>
           <button class="filter-chip fc-saving" onclick="setFilter('saving',this)">🏦 ออม</button>
           <div style="flex:1"></div>
           <span id="tagFilters" style="display:flex;gap:3px;flex-wrap:wrap"></span>
@@ -450,8 +460,8 @@ function doPost(e){
 /* ── State ── */
 let txns=[],tags=["เงินเดือน","ค่าอาหาร","กาแฟ","ค่าเดินทาง","ช้อปปิ้ง","บันเทิง","สุขภาพ","ผ่อนรถ","บัตรเครดิต","ค่าประกัน","ส่วนกลาง","ออม","ลงทุน"];
 let curType='income',curFilter='all',activeTag=null,selTags=[],monthRange=6,currentUser=null,unsubTxns=null;
-const CATS={income:'รายรับ',daily:'กิน/ช้อป',fixed:'ผ่อน/บัตร',saving:'ออม'};
-const SIGN={income:'+',daily:'-',fixed:'-',saving:'→'};
+const CATS={income:'รายรับ',daily:'กิน/ช้อป',travel:'เดินทาง',fixed:'ผ่อน/บัตร',utility:'Utility',saving:'ออม'};
+const SIGN={income:'+',daily:'-',travel:'-',fixed:'-',utility:'-',saving:'→'};
 
 function fb(){return window._fb;}
 function userCol(p){return fb().collection(fb().db,'users',currentUser.uid,p);}
@@ -589,7 +599,7 @@ function switchTab(id,el){
 }
 function setType(t){
   curType=t;
-  ['income','daily','fixed','saving'].forEach(k=>{
+  ['income','daily','travel','fixed','utility','saving'].forEach(k=>{
     document.getElementById('btn-'+k).className='type-bar-btn'+(k===t?' sel-'+k:'');
   });
   if(_noteAutofilled) updateNoteAutofill();
@@ -622,9 +632,9 @@ function renderTagPicker(){
   wrap.appendChild(inp);
 }
 let _noteAutofilled=false;
-const TYPE_COLOR={'income':'var(--income)','daily':'var(--daily)','fixed':'var(--fixed)','saving':'var(--saving)'};
-const TYPE_COLOR_BG={'income':'var(--income-bg)','daily':'var(--daily-bg)','fixed':'var(--fixed-bg)','saving':'var(--saving-bg)'};
-const TYPE_BORDER={'income':'var(--income)','daily':'var(--daily)','fixed':'var(--fixed)','saving':'var(--saving)'};
+const TYPE_COLOR={'income':'var(--income)','daily':'var(--daily)','travel':'var(--travel)','fixed':'var(--fixed)','utility':'var(--utility)','saving':'var(--saving)'};
+const TYPE_COLOR_BG={'income':'var(--income-bg)','daily':'var(--daily-bg)','travel':'var(--travel-bg)','fixed':'var(--fixed-bg)','utility':'var(--utility-bg)','saving':'var(--saving-bg)'};
+const TYPE_BORDER={'income':'var(--income)','daily':'var(--daily)','travel':'var(--travel)','fixed':'var(--fixed)','utility':'var(--utility)','saving':'var(--saving)'};
 function updateNoteAutofill(){
   const noteInp=document.getElementById('noteInp');
   const noteRow=document.getElementById('noteRow');
@@ -677,9 +687,9 @@ window.renderAll=renderAll;
 function renderMonthStrip(){
   const now=new Date();
   const m=txns.filter(t=>{const d=new Date(t.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
-  const inc=sum(m,'income'),dly=sum(m,'daily'),fix=sum(m,'fixed'),sav=sum(m,'saving'),net=inc-dly-fix;
-  set('msIncome','฿'+f(inc));set('msDaily','฿'+f(dly));set('msFixed','฿'+f(fix));set('msSaving','฿'+f(sav));
-  set('msISub',cnt(m,'income')+' รายการ');set('msDSub',cnt(m,'daily')+' รายการ');set('msFSub',cnt(m,'fixed')+' รายการ');set('msSSub',cnt(m,'saving')+' รายการ');
+  const inc=sum(m,'income'),dly=sum(m,'daily'),trv=sum(m,'travel'),fix=sum(m,'fixed'),utl=sum(m,'utility'),sav=sum(m,'saving'),net=inc-dly-trv-fix-utl;
+  set('msIncome','฿'+f(inc));set('msDaily','฿'+f(dly));set('msTravel','฿'+f(trv));set('msFixed','฿'+f(fix));set('msUtility','฿'+f(utl));set('msSaving','฿'+f(sav));
+  set('msISub',cnt(m,'income')+' รายการ');set('msDSub',cnt(m,'daily')+' รายการ');set('msTSub',cnt(m,'travel')+' รายการ');set('msFSub',cnt(m,'fixed')+' รายการ');set('msUSub',cnt(m,'utility')+' รายการ');set('msSSub',cnt(m,'saving')+' รายการ');
   const ne=document.getElementById('msNet');ne.textContent='฿'+f(Math.abs(net));ne.style.color=net>=0?'var(--income)':'var(--daily)';
   set('msNetSub',net>=0?'เดือนนี้บวก':'เดือนนี้ขาด');
 }
@@ -777,7 +787,7 @@ function f(n,signed){const abs=Math.abs(n).toLocaleString('th-TH',{minimumFracti
 function showNotif(m){const el=document.getElementById('notif');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
 function dlCSV(){
   if(!txns.length){showNotif('ไม่มีข้อมูล');return;}
-  const cm={income:'รายรับ',daily:'กิน/ช้อป',fixed:'ผ่อน/บัตร/ประกัน',saving:'ออม'};
+  const cm={income:'รายรับ',daily:'กิน/ช้อป',travel:'เดินทาง',fixed:'ผ่อน/บัตร/ประกัน',utility:'Utility',saving:'ออม'};
   const rows=txns.map(t=>{const d=new Date(t.date+'T00:00:00');return t.date+','+(t.time||'')+','+d.getFullYear()+','+(d.getMonth()+1)+','+cm[t.type]+','+t.amount+',"'+t.note+'","'+(t.tags||[]).join(';')+'"';});
   const blob=new Blob(['\ufeff'+['วันที่,เวลา,ปี,เดือน,ประเภท,จำนวน,รายละเอียด,Tags',...rows].join('\n')],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='flow-transactions.csv';a.click();showNotif('✓ ดาวน์โหลด CSV แล้ว');
