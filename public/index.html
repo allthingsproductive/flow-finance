@@ -533,9 +533,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('hdate').textContent=now.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   setDateShortcut('today');
   document.addEventListener('click', e=>{
-    const dp = document.getElementById('dpDropdown');
-    const wrap = dp ? dp.closest('.dp-wrap') : null;
-    if(dp && dp.classList.contains('open') && wrap && !wrap.contains(e.target)) closeDatePicker();
+    const wrap = document.querySelector('.dp-wrap');
+    if(wrap && !wrap.contains(e.target)) closeDatePicker();
   });
   document.getElementById('tagNewInp').addEventListener('keydown',handleTagKey);
   document.getElementById('newTagInp').addEventListener('keydown',e=>{if(e.key==='Enter')createTag();});
@@ -564,322 +563,106 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 /* ── Custom Date Picker Logic ── */
-let dpCurrentDate = new Date();
+let dpView = new Date();
 
 function toggleDatePicker(){
   const dd = document.getElementById('dpDropdown');
   if(dd.classList.contains('open')){ dd.classList.remove('open'); return; }
   const val = document.getElementById('dateInp').value;
-  dpCurrentDate = val ? new Date(val+'T00:00:00') : new Date();
-  renderDpGrid();
+  dpView = val ? new Date(val+'T00:00:00') : new Date();
+  dpRender();
   dd.classList.add('open');
 }
 
 function closeDatePicker(){
-  document.getElementById('dpDropdown').classList.remove('open');
+  const dd = document.getElementById('dpDropdown');
+  if(dd) dd.classList.remove('open');
 }
 
 function dpNav(dir){
-  dpCurrentDate.setMonth(dpCurrentDate.getMonth() + dir);
-  renderDpGrid();
+  dpView = new Date(dpView.getFullYear(), dpView.getMonth()+dir, 1);
+  dpRender();
 }
 
-function renderDpGrid(){
+function dpFmt(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function dpRender(){
   const now = new Date();
-  const todayStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
-  const selected = document.getElementById('dateInp').value;
-  const yr = dpCurrentDate.getFullYear();
-  const mo = dpCurrentDate.getMonth();
+  const todayStr = dpFmt(now);
+  const sel = document.getElementById('dateInp').value;
+  const yr = dpView.getFullYear();
+  const mo = dpView.getMonth();
   document.getElementById('dpMonthLbl').textContent =
     new Date(yr,mo,1).toLocaleDateString('th-TH',{month:'long',year:'numeric'});
-  const grid = document.getElementById('dpGrid');
-  const dayNames = ['อา','จ','อ','พ','พฤ','ศ','ส'];
-  let html = dayNames.map(d=>'<div class="dp-day-name">'+d+'</div>').join('');
-  const firstDay = new Date(yr,mo,1).getDay(); // 0=Sun
+  const firstDay = new Date(yr,mo,1).getDay();
   const daysInMonth = new Date(yr,mo+1,0).getDate();
   const prevDays = new Date(yr,mo,0).getDate();
-  // prev month filler (firstDay cells)
-  for(let i=0;i<firstDay;i++){
-    const pd = prevDays - firstDay + 1 + i;
-    html += '<button class="dp-day other-month" onclick="dpPickDay('+yr+','+(mo-1)+','+pd+')">'+pd+'</button>';
+  const dayNames=['อา','จ','อ','พ','พฤ','ศ','ส'];
+  let h = dayNames.map(d=>'<div class="dp-day-name">'+d+'</div>').join('');
+  // prev month filler
+  for(let i=firstDay-1;i>=0;i--){
+    const pd=prevDays-i;
+    h+='<button class="dp-day other-month" onclick="dpPick('+yr+','+(mo-1)+','+pd+')">'+pd+'</button>';
   }
-  // current month days
+  // current month
   for(let d=1;d<=daysInMonth;d++){
-    const dateStr = yr+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const isToday = dateStr === todayStr;
-    const isSel = dateStr === selected;
-    html += '<button class="dp-day'+(isToday?' today':'')+(isSel?' selected':'')+'" onclick="dpPickDay('+yr+','+mo+','+d+')">'+d+'</button>';
+    const ds=yr+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    h+='<button class="dp-day'+(ds===todayStr?' today':'')+(ds===sel?' selected':'')+'" onclick="dpPick('+yr+','+mo+','+d+')">'+d+'</button>';
   }
-  // next month filler to complete last row
-  const total = firstDay + daysInMonth;
-  const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
-  for(let d=1;d<=remaining;d++){
-    html += '<button class="dp-day other-month" onclick="dpPickDay('+yr+','+(mo+1)+','+d+')">'+d+'</button>';
+  // next month filler
+  const rem=(firstDay+daysInMonth)%7===0?0:7-(firstDay+daysInMonth)%7;
+  for(let d=1;d<=rem;d++){
+    h+='<button class="dp-day other-month" onclick="dpPick('+yr+','+(mo+1)+','+d+')">'+d+'</button>';
   }
-  grid.innerHTML = html;
+  document.getElementById('dpGrid').innerHTML=h;
 }
 
-function dpPickDay(yr, mo, d){
-  const date = new Date(yr, mo, d);
-  const val = date.toISOString().slice(0,10);
+function dpPick(yr,mo,d){
+  const picked = new Date(yr,mo,d);
+  const val = dpFmt(picked);
   document.getElementById('dateInp').value = val;
   closeDatePicker();
   onDatePicked();
 }
 
 function setDateShortcut(mode){
-  const today = new Date();
-  const d = new Date(today);
+  const today=new Date();
+  const d=new Date(today);
   if(mode==='yesterday') d.setDate(d.getDate()-1);
-  document.getElementById('dateInp').value = d.toISOString().slice(0,10);
-  const dayName = d.toLocaleDateString('th-TH',{weekday:'short'});
-  const dateStr = d.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+  document.getElementById('dateInp').value=dpFmt(d);
   closeDatePicker();
-  if(mode==='today'){
-    document.getElementById('sc-today').textContent='วันนี้ · '+dayName+' '+dateStr;
-    document.getElementById('sc-today').classList.add('active');
-    document.getElementById('sc-yesterday').classList.remove('active');
-    document.getElementById('sc-custom').classList.remove('active');
-  } else {
-    document.getElementById('sc-yesterday').textContent='เมื่อวาน · '+dayName+' '+dateStr;
-    document.getElementById('sc-yesterday').classList.add('active');
-    document.getElementById('sc-today').classList.remove('active');
-    document.getElementById('sc-custom').classList.remove('active');
-    const td=new Date();
-    document.getElementById('sc-today').textContent='วันนี้ · '+td.toLocaleDateString('th-TH',{weekday:'short'})+' '+td.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
-  }
+  const dn=d.toLocaleDateString('th-TH',{weekday:'short'});
+  const ds=d.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+  const tdn=today.toLocaleDateString('th-TH',{weekday:'short'});
+  const tds=today.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+  const yest=new Date(today); yest.setDate(today.getDate()-1);
+  const ydn=yest.toLocaleDateString('th-TH',{weekday:'short'});
+  const yds=yest.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+  document.getElementById('sc-today').textContent='วันนี้ · '+tdn+' '+tds;
+  document.getElementById('sc-yesterday').textContent='เมื่อวาน · '+ydn+' '+yds;
+  document.getElementById('sc-today').classList.toggle('active',mode==='today');
+  document.getElementById('sc-yesterday').classList.toggle('active',mode==='yesterday');
+  document.getElementById('sc-custom').classList.remove('active');
 }
 
 function onDatePicked(){
-  const val = document.getElementById('dateInp').value;
+  const val=document.getElementById('dateInp').value;
   if(!val) return;
-  const d = new Date(val+'T00:00:00');
-  const today = new Date(); today.setHours(0,0,0,0);
-  const yest = new Date(today); yest.setDate(today.getDate()-1);
-  if(d.getTime()===today.getTime()){ setDateShortcut('today'); return; }
-  if(d.getTime()===yest.getTime()){ setDateShortcut('yesterday'); return; }
-  const dayName = d.toLocaleDateString('th-TH',{weekday:'short'});
-  const dateStr = d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
-  document.getElementById('customLbl').textContent = dayName+' '+dateStr;
+  const d=new Date(val+'T00:00:00');
+  const today=new Date(); today.setHours(0,0,0,0);
+  const yest=new Date(today); yest.setDate(today.getDate()-1);
+  if(d.getTime()===today.getTime()){setDateShortcut('today');return;}
+  if(d.getTime()===yest.getTime()){setDateShortcut('yesterday');return;}
+  const dayName=d.toLocaleDateString('th-TH',{weekday:'short'});
+  const dateStr=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+  document.getElementById('customLbl').textContent=dayName+' '+dateStr;
   document.getElementById('sc-custom').classList.add('active');
   document.getElementById('sc-today').classList.remove('active');
   document.getElementById('sc-yesterday').classList.remove('active');
 }
 function updateDateLbl(){}
-
-/* ── Load data ── */
-async function loadUserData(){
-  try{
-    const snap=await fb().getDocs(userCol('tags'));
-    if(!snap.empty)tags=snap.docs.map(d=>d.data().name).filter(Boolean);
-  }catch(e){console.warn(e);}
-  if(unsubTxns)unsubTxns();
-  const q=fb().query(userCol('transactions'),fb().orderBy('date','desc'));
-  unsubTxns=fb().onSnapshot(q,snap=>{
-    txns=snap.docs.map(d=>({...d.data(),_docId:d.id}));
-    renderAll();
-  });
-}
-
-async function saveTags(){
-  if(!currentUser)return;
-  const col=userCol('tags');
-  const ex=await fb().getDocs(col);
-  await Promise.all(ex.docs.map(d=>fb().deleteDoc(d.ref)));
-  await Promise.all(tags.map(name=>fb().addDoc(col,{name})));
-}
-
-/* ── Core ── */
-function switchTab(id,el){
-  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  el.classList.add('active');
-  if(id==='summary'){renderSummaryTab();renderMonthly();renderBreakdown();}
-}
-function setType(t){
-  curType=t;
-  ['income','daily','fixed','saving'].forEach(k=>{
-    document.getElementById('btn-'+k).className='type-bar-btn'+(k===t?' sel-'+k:'');
-  });
-  if(_noteAutofilled) updateNoteAutofill();
-}
-function setFilter(f,el){
-  curFilter=f;
-  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');render();
-}
-function handleTagKey(e){
-  if((e.key==='Enter'||e.key===',')&&e.target.value.trim()){
-    e.preventDefault();
-    const t=e.target.value.trim().replace(/,/g,'');
-    if(t&&!tags.includes(t)){tags.push(t);saveTags();renderTagMgr();}
-    if(!selTags.includes(t))selTags.push(t);
-    e.target.value='';renderTagPicker();
-    document.getElementById('tagNewInp').addEventListener('keydown',handleTagKey);
-  }
-}
-function renderTagPicker(){
-  const wrap=document.getElementById('tagPicker'),inp=document.getElementById('tagNewInp');
-  wrap.innerHTML='';
-  tags.forEach(t=>{
-    const c=document.createElement('span');
-    c.className='qa-tag-chip'+(selTags.includes(t)?' on':'');
-    c.textContent=t;
-    c.onclick=()=>{selTags.includes(t)?selTags=selTags.filter(x=>x!==t):selTags.push(t);renderTagPicker();updateNoteAutofill();};
-    wrap.appendChild(c);
-  });
-  wrap.appendChild(inp);
-}
-let _noteAutofilled=false;
-const TYPE_COLOR={'income':'var(--income)','daily':'var(--daily)','fixed':'var(--fixed)','saving':'var(--saving)'};
-const TYPE_COLOR_BG={'income':'var(--income-bg)','daily':'var(--daily-bg)','fixed':'var(--fixed-bg)','saving':'var(--saving-bg)'};
-const TYPE_BORDER={'income':'var(--income)','daily':'var(--daily)','fixed':'var(--fixed)','saving':'var(--saving)'};
-function updateNoteAutofill(){
-  const noteInp=document.getElementById('noteInp');
-  const noteRow=document.getElementById('noteRow');
-  const hint=document.getElementById('autofillHint');
-  if(!noteInp||!noteRow) return;
-  if(selTags.length>0&&(_noteAutofilled||noteInp.value==='')){
-    noteInp.value=selTags.join(', ');
-    noteInp.style.color=TYPE_COLOR[curType]||'var(--income)';
-    noteRow.style.borderColor=TYPE_BORDER[curType]||'var(--income)';
-    noteRow.style.background=TYPE_COLOR_BG[curType]||'var(--income-bg)';
-    hint.style.display='block';
-    _noteAutofilled=true;
-  } else if(selTags.length===0&&_noteAutofilled){
-    noteInp.value='';
-    noteInp.style.color='';
-    noteRow.style.borderColor='';
-    noteRow.style.background='';
-    hint.style.display='none';
-    _noteAutofilled=false;
-  }
-}
-async function addTx(){
-  if(!currentUser){showNotif('กรุณา Login ก่อน');return;}
-  const amt=parseFloat(document.getElementById('amtInp').value);
-  const note=document.getElementById('noteInp').value.trim();
-  const date=document.getElementById('dateInp').value;
-  if(!amt||amt<=0){showNotif('กรุณากรอกจำนวนเงิน');return;}
-  if(!note && selTags.length>0) note=selTags.join(', ');
-  if(!note){showNotif('กรุณากรอกรายละเอียดหรือเลือก tag');return;}
-  try{
-    await fb().addDoc(userCol('transactions'),{
-      id:Date.now(),type:curType,amount:amt,note,date,tags:[...selTags],
-      time:new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})
-    });
-    document.getElementById('amtInp').value='';
-    document.getElementById('noteInp').value='';
-    selTags=[];renderTagPicker();
-    showNotif('✓ บันทึก'+CATS[curType]+'แล้ว');
-  }catch(e){console.error(e);showNotif('บันทึกไม่สำเร็จ กรุณาลองใหม่');}
-}
-async function delTx(id,docId){
-  if(!confirm('ลบรายการนี้?'))return;
-  try{await fb().deleteDoc(fb().doc(fb().db,'users',currentUser.uid,'transactions',docId));showNotif('ลบแล้ว');}
-  catch(e){showNotif('ลบไม่สำเร็จ');}
-}
-function renderAll(){renderMonthStrip();render();renderTagMgr();renderTagPicker();renderWeekChart();}
-window.renderAll=renderAll;
-
-/* ── Render ── */
-function renderMonthStrip(){
-  const now=new Date();
-  const m=txns.filter(t=>{const d=new Date(t.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
-  const inc=sum(m,'income'),dly=sum(m,'daily'),fix=sum(m,'fixed'),sav=sum(m,'saving'),net=inc-dly-fix;
-  set('msIncome','฿'+f(inc));set('msDaily','฿'+f(dly));set('msFixed','฿'+f(fix));set('msSaving','฿'+f(sav));
-  set('msISub',cnt(m,'income')+' รายการ');set('msDSub',cnt(m,'daily')+' รายการ');set('msFSub',cnt(m,'fixed')+' รายการ');set('msSSub',cnt(m,'saving')+' รายการ');
-  const ne=document.getElementById('msNet');ne.textContent='฿'+f(Math.abs(net));ne.style.color=net>=0?'var(--income)':'var(--daily)';
-  set('msNetSub',net>=0?'เดือนนี้บวก':'เดือนนี้ขาด');
-}
-function renderSummaryTab(){
-  const now=new Date();
-  const m=txns.filter(t=>{const d=new Date(t.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
-  const inc=sum(m,'income'),dly=sum(m,'daily'),fix=sum(m,'fixed'),sav=sum(m,'saving'),net=inc-dly-fix;
-  set('sIncome','฿'+f(inc));set('sDaily','฿'+f(dly));set('sFixed','฿'+f(fix));set('sSaving','฿'+f(sav));
-  set('sDailySub',cnt(m,'daily')+' รายการ');set('sFixedSub',cnt(m,'fixed')+' รายการ');set('sSavingSub',cnt(m,'saving')+' รายการ');
-  set('nb1','฿'+f(dly));set('nb2','฿'+f(fix));set('nb3','฿'+f(sav));
-  const ne=document.getElementById('sNet');ne.textContent='฿'+f(Math.abs(net));ne.style.color=net>=0?'var(--income)':'var(--daily)';
-}
-function render(){
-  const q=document.getElementById('searchInput').value.toLowerCase();
-  let data=[...txns];
-  if(curFilter!=='all')data=data.filter(t=>t.type===curFilter);
-  if(activeTag)data=data.filter(t=>t.tags&&t.tags.includes(activeTag));
-  if(q)data=data.filter(t=>t.note.toLowerCase().includes(q)||(t.tags||[]).some(g=>g.toLowerCase().includes(q)));
-  const el=document.getElementById('txList');
-  if(!data.length){el.innerHTML='<div class="empty">📋 '+(txns.length?'ไม่พบรายการ':'ยังไม่มีรายการ — เพิ่มรายการแรก!')+'</div>';return;}
-  const grp={};data.forEach(t=>{if(!grp[t.date])grp[t.date]=[];grp[t.date].push(t);});
-  const sorted=Object.keys(grp).sort((a,b)=>b.localeCompare(a));
-  el.innerHTML=sorted.map((date,i)=>{
-    const items=grp[date];
-    const net=sum(items,'income')-sum(items,'daily')-sum(items,'fixed');
-    const d=new Date(date+'T00:00:00');
-    const lbl=d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
-    return (i>0?'<div class="divider"></div>':'')+
-      '<div class="day-header"><span class="day-label">'+lbl+'</span><span class="day-total" style="color:'+(net>=0?'var(--income)':'var(--daily)')+'">'+f(net,true)+' ฿</span></div>'+
-      items.map(t=>'<div class="tx-row" onclick="openEditById('+JSON.stringify(t.id)+')">'+
-        '<div class="tx-dot '+t.type+'"></div>'+
-        '<div class="tx-info"><div class="tx-note">'+esc(t.note)+'</div>'+
-        '<div class="tx-meta"><span class="tx-time">'+esc(t.time||'')+'</span>'+
-        '<span class="badge '+t.type+'">'+CATS[t.type]+'</span>'+
-        (t.tags||[]).map(g=>'<span class="tag">'+esc(g)+'</span>').join('')+'</div></div>'+
-        '<div class="tx-amount '+t.type+'">'+SIGN[t.type]+'฿'+f(t.amount)+'</div>'+
-        '<button class="tx-delete" onclick="delTx('+t.id+',\''+esc(t._docId||'')+'\')">×</button>'+
-      '</div>').join('');
-  }).join('');
-}
-function renderTagMgr(){
-  const el=document.getElementById('tagMgr');
-  el.innerHTML=tags.map(t=>'<div class="mt"><span style="cursor:pointer" onclick="filterTag(\''+esc(t)+'\')">'+(activeTag===t?'<u>'+esc(t)+'</u>':esc(t))+'</span><button onclick="delTag(event,\''+esc(t)+'\')">×</button></div>').join('');
-  document.getElementById('tagCount').textContent=tags.length+' tags';
-  document.getElementById('tagFilters').innerHTML=tags.slice(0,4).map(t=>'<span class="filter-chip fc-all '+(activeTag===t?'active':'')+'" onclick="filterTag(\''+esc(t)+'\')" style="font-size:9px">#'+esc(t)+'</span>').join('');
-}
-function filterTag(t){activeTag=activeTag===t?null:t;render();renderTagMgr();}
-function delTag(e,t){e.stopPropagation();if(!confirm('ลบ tag "'+t+'"?'))return;tags=tags.filter(x=>x!==t);saveTags();selTags=selTags.filter(x=>x!==t);renderTagMgr();renderTagPicker();}
-function createTag(){const inp=document.getElementById('newTagInp'),t=inp.value.trim();if(!t)return;if(!tags.includes(t)){tags.push(t);saveTags();renderTagMgr();renderTagPicker();showNotif('เพิ่ม "'+t+'" แล้ว');}else showNotif('Tag นี้มีอยู่แล้ว');inp.value='';}
-function renderWeekChart(){
-  const el=document.getElementById('chartBars');
-  const days=[];
-  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const day=txns.filter(t=>t.date===ds);days.push({lbl:d.toLocaleDateString('th-TH',{weekday:'short'}),income:sum(day,'income'),daily:sum(day,'daily'),fixed:sum(day,'fixed')});}
-  const max=Math.max(...days.map(d=>Math.max(d.income,d.daily+d.fixed)),1);
-  el.innerHTML=days.map(d=>'<div class="cbw"><div class="cba"><div class="cb income" style="height:'+Math.max(d.income/max*100,d.income?3:0)+'%"></div><div class="cb daily" style="height:'+Math.max(d.daily/max*100,d.daily?3:0)+'%"></div><div class="cb fixed" style="height:'+Math.max(d.fixed/max*100,d.fixed?3:0)+'%"></div></div><span class="cl">'+d.lbl+'</span></div>').join('');
-}
-let monthRange2=6;
-function setMR(n,el){monthRange2=n;document.querySelectorAll('.mch-range-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderMonthly();}
-function renderMonthly(){
-  const el=document.getElementById('mchCanvas');if(!el)return;
-  const now=new Date();const months=[];
-  for(let i=monthRange2-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const yr=d.getFullYear(),mo=d.getMonth();const mt=txns.filter(t=>{const td=new Date(t.date);return td.getFullYear()===yr&&td.getMonth()===mo;});months.push({lbl:d.toLocaleDateString('th-TH',{month:'short',year:'2-digit'}),isCur:i===0,inc:sum(mt,'income'),dly:sum(mt,'daily'),fix:sum(mt,'fixed'),sav:sum(mt,'saving')});}
-  const max=Math.max(...months.map(m=>Math.max(m.inc,m.dly+m.fix+m.sav)),1)*1.08;
-  el.innerHTML=months.map(m=>{
-    const ip=Math.min(m.inc/max*100,92),ep=Math.min((m.dly+m.fix+m.sav)/max*100,92),et=m.dly+m.fix+m.sav;
-    const net=m.inc-m.dly-m.fix;
-    const tt='<div class="tt-month">'+m.lbl+'</div><div class="tt-row"><span class="tt-lbl">รายรับ</span><span class="tt-val" style="color:#8fd4b0">฿'+f(m.inc)+'</span></div><div class="tt-row"><span class="tt-lbl">กิน/ช้อป</span><span class="tt-val" style="color:#f4a99f">฿'+f(m.dly)+'</span></div><div class="tt-row"><span class="tt-lbl">ผ่อน/บัตร</span><span class="tt-val" style="color:#d4a97a">฿'+f(m.fix)+'</span></div><div class="tt-row"><span class="tt-lbl">ออม</span><span class="tt-val" style="color:#8fb8de">฿'+f(m.sav)+'</span></div><div class="tt-divider"></div><div class="tt-row"><span class="tt-lbl">เหลือจริง</span><span class="tt-val" style="color:'+(net>=0?'#8fd4b0':'#f4a99f')+'">฿'+f(net)+'</span></div>';
-    return '<div class="mch-group"><div class="mch-tooltip">'+tt+'</div>'+
-      '<div class="mch-income-bar" style="height:'+Math.max(ip,m.inc?2:0)+'%"></div>'+
-      (et>0?'<div class="mch-exp-bar" style="height:'+Math.max(ep,2)+'%">'+(m.sav?'<div class="mch-seg sav" style="height:'+(m.sav/et*100)+'%"></div>':'')+(m.fix?'<div class="mch-seg fix" style="height:'+(m.fix/et*100)+'%"></div>':'')+(m.dly?'<div class="mch-seg dly" style="height:'+(m.dly/et*100)+'%"></div>':'')+'</div>':'')+
-      (m.inc?'<div class="mch-idot" style="bottom:calc(22px + '+Math.max(ip,2)+'% - 3px)"></div>':'')+
-      '<span class="mch-mlbl'+(m.isCur?' cur':'')+'">'+m.lbl+'</span></div>';
-  }).join('');
-}
-function renderBreakdown(){
-  const now=new Date();
-  const m=txns.filter(t=>{const d=new Date(t.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
-  const types=[{key:'daily',label:'🍜 กิน/ช้อป',color:'var(--daily)'},{key:'fixed',label:'💳 ผ่อน/บัตร',color:'var(--fixed)'},{key:'saving',label:'🏦 ออม',color:'var(--saving)'},{key:'income',label:'↑ รายรับ',color:'var(--income)'}];
-  document.getElementById('breakdownGrid').innerHTML=types.map(tp=>{
-    const items=m.filter(t=>t.type===tp.key);const total=sum(items,tp.key);
-    if(!items.length)return '<div class="bk-card"><div class="bk-title">'+tp.label+'</div><div style="font-size:11px;color:var(--muted)">ไม่มีรายการเดือนนี้</div></div>';
-    const tagTotals={};items.forEach(t=>{(t.tags&&t.tags.length?t.tags:['(ไม่มี tag)']).forEach(g=>{tagTotals[g]=(tagTotals[g]||0)+t.amount;});});
-    const sorted=Object.entries(tagTotals).sort((a,b)=>b[1]-a[1]).slice(0,5);
-    const mx=sorted[0][1];
-    return '<div class="bk-card"><div class="bk-title">'+tp.label+' <span style="font-family:\'DM Mono\',monospace;font-size:11px;font-weight:400;color:'+tp.color+'">฿'+f(total)+'</span></div>'+sorted.map(([tag,amt])=>'<div class="bk-row"><span class="bk-tag"><span style="width:6px;height:6px;border-radius:50%;background:'+tp.color+';display:inline-block;opacity:.7"></span>'+esc(tag)+'</span><div class="bk-bar-wrap"><div class="bk-bar-fill" style="width:'+(amt/mx*100)+'%;background:'+tp.color+';opacity:.6"></div></div><span class="bk-amt">฿'+f(amt)+'</span></div>').join('')+'</div>';
-  }).join('');
-}
-
-/* ── Utils ── */
-
 /* ── Edit ── */
 let editTx = null;
 let editType = 'income';
