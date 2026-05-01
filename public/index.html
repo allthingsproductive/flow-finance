@@ -29,7 +29,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .login-note{font-size:11px;color:var(--muted);text-align:center;max-width:260px;line-height:1.6}
 
 /* Quick add */
-.quick-add{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:18px}
+.quick-add{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px}
 .type-bar{display:grid;grid-template-columns:repeat(4,1fr)}
 .type-bar-btn{padding:14px 4px 12px;border:none;border-bottom:1px solid var(--border);border-right:1px solid var(--border);background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:5px;transition:background .12s,color .12s;position:relative}
 .type-bar-btn:last-child{border-right:none}
@@ -39,7 +39,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .type-bar-btn.sel-daily{background:var(--daily-bg);color:var(--daily)}.type-bar-btn.sel-daily::after{background:var(--daily)}
 .type-bar-btn.sel-fixed{background:var(--fixed-bg);color:var(--fixed)}.type-bar-btn.sel-fixed::after{background:var(--fixed)}
 .type-bar-btn.sel-saving{background:var(--saving-bg);color:var(--saving)}.type-bar-btn.sel-saving::after{background:var(--saving)}
-.qa-body{padding:16px 18px 18px}
+.qa-body{padding:16px 18px 18px;overflow:visible}
 .qa-amount-row{display:flex;align-items:baseline;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--border-light);padding-bottom:14px}
 .qa-baht{font-family:'DM Mono',monospace;font-size:20px;color:var(--muted)}
 .qa-amt-inp{flex:1;border:none;background:transparent;outline:none;font-family:'DM Mono',monospace;font-size:30px;font-weight:500;color:var(--text);width:100%;min-width:0;letter-spacing:-1px}
@@ -47,7 +47,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .qa-note-row{display:flex;align-items:center;margin-bottom:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;transition:border-color .15s,background .15s}.qa-note-row.autofilled{border-color:var(--income);background:var(--income-bg)}
 .qa-note-inp{flex:1;border:none;background:transparent;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);min-width:0;padding:10px 12px}.qa-note-inp.autofill-active{color:var(--income);font-style:italic}
 .qa-note-inp::placeholder{color:var(--muted)}
-.qa-date-row{display:flex;align-items:center;gap:5px;margin-bottom:10px;margin-top:-4px;flex-wrap:wrap}
+.qa-date-row{display:flex;align-items:center;gap:5px;margin-bottom:10px;margin-top:-4px;flex-wrap:wrap;overflow:visible;position:relative}
 .qa-sc{padding:4px 11px;border-radius:100px;border:1px dashed var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap}
 .qa-sc:hover{border-color:var(--mid);color:var(--mid)}
 .qa-sc.active{border-style:solid;border-color:var(--text);color:var(--text);background:var(--bg)}
@@ -186,8 +186,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .bk-bar-fill{height:100%;border-radius:2px}
 .bk-amt{font-family:'DM Mono',monospace;font-size:11px;color:var(--mid);white-space:nowrap}
 
-.dp-wrap{position:relative;display:inline-block}
-.dp-dropdown{position:absolute;top:calc(100% + 6px);left:0;z-index:300;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.12);padding:14px 12px;width:228px;display:none}
+.dp-wrap{position:relative;display:inline-block;overflow:visible}
+.dp-dropdown{position:absolute;top:calc(100% + 6px);left:0;z-index:500;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.12);padding:14px 12px;width:228px;display:none}
 .dp-dropdown.open{display:block}
 .dp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .dp-month-lbl{font-size:12px;font-weight:500;color:var(--text)}
