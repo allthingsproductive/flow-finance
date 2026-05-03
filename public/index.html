@@ -208,7 +208,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 
 
 /* ── Payment Method ── */
-.pay-toggle{display:flex;gap:6px;margin-bottom:12px}
+.pay-toggle{display:flex;gap:6px;margin-bottom:10px;margin-top:-6px}
 .pay-btn{flex:1;padding:6px;border-radius:var(--rs);border:1px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .12s;text-align:center}
 .pay-btn.active-cash{background:var(--income-bg);border-color:var(--income);color:var(--income)}
 .pay-btn.active-credit{background:#FEF3C7;border-color:#D97706;color:#D97706}
@@ -357,14 +357,14 @@ window.signOutUser=async function(){
       <button class="type-bar-btn" id="btn-utility" onclick="setType('utility')"><span class="tbi">🏠</span>Utility</button>
       <button class="type-bar-btn" id="btn-saving" onclick="setType('saving')"><span class="tbi">🏦</span>ออม / เตรียม</button>
     </div>
-    <div id="payToggle" class="pay-toggle">
-      <button class="pay-btn active-cash" id="pay-cash" type="button" onclick="setPayment('cash')">💵 เงินสด / โอน</button>
-      <button class="pay-btn" id="pay-credit" type="button" onclick="setPayment('credit')">💳 บัตรเครดิต</button>
-    </div>
     <div class="qa-body">
       <div class="qa-amount-row">
         <span class="qa-baht">฿</span>
         <input class="qa-amt-inp" type="number" id="amtInp" placeholder="0" min="0" step="any">
+      </div>
+      <div id="payToggle" class="pay-toggle">
+        <button class="pay-btn active-cash" id="pay-cash" type="button" onclick="setPayment('cash')">💵 เงินสด / โอน</button>
+        <button class="pay-btn" id="pay-credit" type="button" onclick="setPayment('credit')">💳 บัตรเครดิต</button>
       </div>
       <div class="qa-note-row" id="noteRow">
         <input class="qa-note-inp" type="text" id="noteInp" placeholder="รายละเอียด (optional)..." maxlength="200">
