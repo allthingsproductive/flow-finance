@@ -205,6 +205,59 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .dp-day.dp-sel{background:var(--text);color:white}
 .dp-day.dp-other{color:var(--border)}
 @media(max-width:680px){.dp-dropdown{position:fixed;bottom:0;left:0;right:0;width:100%;border-radius:var(--r) var(--r) 0 0;padding:16px 16px 32px;top:auto;z-index:400}}
+
+
+/* ── Payment Method ── */
+.pay-toggle{display:flex;gap:6px;margin-bottom:12px}
+.pay-btn{flex:1;padding:6px;border-radius:var(--rs);border:1px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .12s;text-align:center}
+.pay-btn.active-cash{background:var(--income-bg);border-color:var(--income);color:var(--income)}
+.pay-btn.active-credit{background:#FEF3C7;border-color:#D97706;color:#D97706}
+#payToggle{display:none}
+
+/* ── Payment Summary ── */
+.pay-sum-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.pay-sum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.pay-sum-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px;font-weight:500}
+.pay-sum-amount{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;letter-spacing:-.5px}
+.pay-sum-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.pay-bar-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh);margin-bottom:16px}
+.pay-bar-label{font-size:11px;color:var(--mid);margin-bottom:8px;display:flex;justify-content:space-between}
+.pay-bar-track{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;display:flex}
+.pay-bar-cash{background:var(--income);opacity:.7;border-radius:4px 0 0 4px;transition:width .3s}
+.pay-bar-credit{background:#D97706;opacity:.7;border-radius:0 4px 4px 0;transition:width .3s}
+/* ── Edit Modal ── */
+.edit-overlay{position:fixed;inset:0;background:rgba(26,25,22,.4);z-index:600;display:none;align-items:center;justify-content:center;padding:20px}
+.edit-overlay.open{display:flex}
+.edit-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-md);width:100%;max-width:400px;overflow:hidden}
+.edit-modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border-light)}
+.edit-modal-title{font-size:13px;font-weight:500;color:var(--mid)}
+.edit-close{background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted);padding:0 4px;line-height:1}
+.edit-body{padding:14px 16px 16px}
+.edit-type-bar{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:12px}
+.edit-type-bar-row2{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--rs) var(--rs);overflow:hidden;margin-bottom:12px;margin-top:-13px}
+.etb{padding:8px 2px;border:none;border-right:1px solid var(--border);background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;color:var(--muted);text-align:center;transition:all .12s}
+.etb:last-child{border-right:none}
+.etb.sel-income{background:var(--income-bg);color:var(--income)}
+.etb.sel-daily{background:var(--daily-bg);color:var(--daily)}
+.etb.sel-travel{background:var(--travel-bg);color:var(--travel)}
+.etb.sel-fixed{background:var(--fixed-bg);color:var(--fixed)}
+.etb.sel-utility{background:var(--utility-bg);color:var(--utility)}
+.etb.sel-saving{background:var(--saving-bg);color:var(--saving)}
+.edit-field{margin-bottom:10px}
+.edit-field label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.edit-field input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
+.edit-field input:focus{border-color:var(--mid);background:white}
+.edit-field input[type=number]{font-family:'DM Mono',monospace}
+.edit-tags{display:flex;flex-wrap:wrap;gap:4px;padding:6px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);min-height:32px}
+.edit-tag-chip{padding:2px 8px;border-radius:100px;font-size:11px;cursor:pointer;user-select:none}
+.edit-tag-chip.off{background:var(--tag-bg);color:var(--tag-text)}
+.edit-tag-chip.on{background:var(--text);color:white}
+.edit-actions{display:flex;gap:8px;margin-top:14px}
+.edit-save{flex:1;padding:9px;border-radius:var(--rs);border:none;background:var(--text);color:white;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+.edit-save:hover{opacity:.85}
+.edit-del{padding:9px 14px;border-radius:var(--rs);border:1px solid var(--border);background:transparent;color:var(--daily);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
+.edit-del:hover{background:var(--daily-bg)}
+@media(max-width:680px){.edit-overlay{align-items:flex-end;padding:0}.edit-modal{border-radius:var(--r) var(--r) 0 0;max-width:100%}}
 footer{padding:18px 0 12px;text-align:center;font-size:10px;color:var(--muted);border-top:1px solid var(--border);margin-top:20px}
 .notif{position:fixed;bottom:20px;right:20px;background:var(--text);color:#fff;padding:9px 14px;border-radius:var(--r);font-size:12px;box-shadow:var(--sh-md);transform:translateY(60px);opacity:0;transition:all .2s;z-index:999}
 .notif.show{transform:translateY(0);opacity:1}
@@ -245,12 +298,12 @@ footer{padding:18px 0 12px;text-align:center;font-size:10px;color:var(--muted);b
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,collection,doc,addDoc,deleteDoc,getDocs,query,orderBy,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,collection,doc,addDoc,deleteDoc,updateDoc,getDocs,query,orderBy,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 const cfg={apiKey:"AIzaSyACGexhjBhe7BZQOaI-ut66SXqG7vUh4ag",authDomain:"flow-finance-927ae.firebaseapp.com",projectId:"flow-finance-927ae",storageBucket:"flow-finance-927ae.firebasestorage.app",messagingSenderId:"270362085632",appId:"1:270362085632:web:849ad2557606f624954be5"};
 const app=initializeApp(cfg);
 const auth=getAuth(app);
 const db=getFirestore(app);
-window._fb={auth,db,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged,collection,doc,addDoc,deleteDoc,getDocs,query,orderBy,onSnapshot};
+window._fb={auth,db,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged,collection,doc,addDoc,deleteDoc,updateDoc,getDocs,query,orderBy,onSnapshot};
 window.signInGoogle=async function(){
   try{await signInWithPopup(auth,new GoogleAuthProvider());}
   catch(e){console.error(e);alert('Login ไม่สำเร็จ กรุณาลองใหม่');}
@@ -303,6 +356,10 @@ window.signOutUser=async function(){
       <button class="type-bar-btn" id="btn-fixed" onclick="setType('fixed')"><span class="tbi">💳</span>ผ่อน / บัตร</button>
       <button class="type-bar-btn" id="btn-utility" onclick="setType('utility')"><span class="tbi">🏠</span>Utility</button>
       <button class="type-bar-btn" id="btn-saving" onclick="setType('saving')"><span class="tbi">🏦</span>ออม / เตรียม</button>
+    </div>
+    <div id="payToggle" class="pay-toggle">
+      <button class="pay-btn active-cash" id="pay-cash" type="button" onclick="setPayment('cash')">💵 เงินสด / โอน</button>
+      <button class="pay-btn" id="pay-credit" type="button" onclick="setPayment('credit')">💳 บัตรเครดิต</button>
     </div>
     <div class="qa-body">
       <div class="qa-amount-row">
@@ -429,6 +486,30 @@ function doPost(e){
     <div class="net-arrow">→</div>
     <div style="text-align:right"><div class="net-seg-label">เงินเหลือจริง</div><div class="net-seg-val" id="sNet">฿0</div></div>
   </div>
+  <!-- Payment Summary -->
+  <div class="pay-sum-row">
+    <div class="pay-sum-card" style="border-left:3px solid var(--income)">
+      <div class="pay-sum-label">💵 เงินสด / โอน</div>
+      <div class="pay-sum-amount" style="color:var(--income)" id="payCash">฿0</div>
+      <div class="pay-sum-sub" id="payCashSub">0 รายการ</div>
+    </div>
+    <div class="pay-sum-card" style="border-left:3px solid #D97706">
+      <div class="pay-sum-label">💳 บัตรเครดิต</div>
+      <div class="pay-sum-amount" style="color:#D97706" id="payCredit">฿0</div>
+      <div class="pay-sum-sub" id="payCreditSub">0 รายการ</div>
+    </div>
+  </div>
+  <div class="pay-bar-wrap">
+    <div class="pay-bar-label">
+      <span>สัดส่วนวิธีการจ่าย</span>
+      <span id="payRatioLbl" style="color:var(--muted)">-</span>
+    </div>
+    <div class="pay-bar-track">
+      <div class="pay-bar-cash" id="payBarCash" style="width:50%"></div>
+      <div class="pay-bar-credit" id="payBarCredit" style="width:50%"></div>
+    </div>
+  </div>
+
   <div class="mch-wrap">
     <div class="mch-header">
       <div class="mch-title">สรุปย้อนหลังรายเดือน</div>
@@ -452,6 +533,43 @@ function doPost(e){
   <div class="breakdown-grid" id="breakdownGrid"></div>
 </div>
 
+
+<!-- Edit Modal -->
+<div class="edit-overlay" id="editOverlay" onclick="closeEditModal(event)">
+  <div class="edit-modal" onclick="event.stopPropagation()">
+    <div class="edit-modal-hdr">
+      <span class="edit-modal-title">แก้ไขรายการ</span>
+      <button class="edit-close" onclick="closeEditModal()">×</button>
+    </div>
+    <div class="edit-body">
+      <div class="edit-type-bar">
+        <button class="etb" id="et-income" onclick="setEditType('income')">↑ รายรับ</button>
+        <button class="etb" id="et-daily" onclick="setEditType('daily')">🍜 กิน/ช้อป</button>
+        <button class="etb" id="et-travel" onclick="setEditType('travel')">🚗 เดินทาง</button>
+      </div>
+      <div class="edit-type-bar-row2">
+        <button class="etb" id="et-fixed" onclick="setEditType('fixed')">💳 ผ่อน/บัตร</button>
+        <button class="etb" id="et-utility" onclick="setEditType('utility')">🏠 Utility</button>
+        <button class="etb" id="et-saving" onclick="setEditType('saving')">🏦 ออม</button>
+      </div>
+      <div class="edit-field"><label>จำนวน (บาท)</label><input type="number" id="editAmt" min="0" step="any"></div>
+      <div class="edit-field"><label>รายละเอียด</label><input type="text" id="editNote" maxlength="200"></div>
+      <div class="edit-field"><label>วันที่</label><input type="date" id="editDate"></div>
+      <div class="edit-field" id="editPayField" style="display:none">
+        <label>วิธีการจ่าย</label>
+        <div class="pay-toggle" style="margin-bottom:0">
+          <button class="pay-btn active-cash" id="epay-cash" type="button" onclick="setEditPayment('cash')">💵 เงินสด / โอน</button>
+          <button class="pay-btn" id="epay-credit" type="button" onclick="setEditPayment('credit')">💳 บัตรเครดิต</button>
+        </div>
+      </div>
+      <div class="edit-field"><label>Tags</label><div class="edit-tags" id="editTagPicker"></div></div>
+      <div class="edit-actions">
+        <button class="edit-del" onclick="deleteEditTx()">ลบรายการ</button>
+        <button class="edit-save" onclick="saveEditTx()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
 <footer>flow. — Firebase edition &nbsp;·&nbsp; made with ♥</footer>
 </div>
 <div class="notif" id="notif"></div>
@@ -471,6 +589,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const now=new Date();
   document.getElementById('hdate').textContent=now.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   setDateShortcut('today');
+  updatePayToggle();
   document.addEventListener('click',e=>{const w=document.querySelector('.dp-wrap');if(w&&!w.contains(e.target))dpClose();});
   document.getElementById('tagNewInp').addEventListener('keydown',handleTagKey);
   document.getElementById('newTagInp').addEventListener('keydown',e=>{if(e.key==='Enter')createTag();});
@@ -595,7 +714,7 @@ function switchTab(id,el){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   el.classList.add('active');
-  if(id==='summary'){renderSummaryTab();renderMonthly();renderBreakdown();}
+  if(id==='summary'){renderSummaryTab();renderMonthly();renderBreakdown();renderPaySummary();}
 }
 function setType(t){
   curType=t;
@@ -603,6 +722,7 @@ function setType(t){
     document.getElementById('btn-'+k).className='type-bar-btn'+(k===t?' sel-'+k:'');
   });
   if(_noteAutofilled) updateNoteAutofill();
+  updatePayToggle();
 }
 function setFilter(f,el){
   curFilter=f;
@@ -665,13 +785,15 @@ async function addTx(){
   if(!note && selTags.length>0) note=selTags.join(', ');
   if(!note){showNotif('กรุณากรอกรายละเอียดหรือเลือก tag');return;}
   try{
+    const payMethod = EXPENSE_TYPES_PAY.includes(curType) ? _payment : null;
     await fb().addDoc(userCol('transactions'),{
       id:Date.now(),type:curType,amount:amt,note,date,tags:[...selTags],
+      payment: payMethod,
       time:new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})
     });
     document.getElementById('amtInp').value='';
     document.getElementById('noteInp').value='';
-    selTags=[];renderTagPicker();
+    selTags=[];_payment='cash';setPayment('cash');renderTagPicker();
     showNotif('✓ บันทึก'+CATS[curType]+'แล้ว');
   }catch(e){console.error(e);showNotif('บันทึกไม่สำเร็จ กรุณาลองใหม่');}
 }
@@ -719,11 +841,11 @@ function render(){
     const lbl=d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
     return (i>0?'<div class="divider"></div>':'')+
       '<div class="day-header"><span class="day-label">'+lbl+'</span><span class="day-total" style="color:'+(net>=0?'var(--income)':'var(--daily)')+'">'+f(net,true)+' ฿</span></div>'+
-      items.map(t=>'<div class="tx-row">'+
+      items.map(t=>'<div class="tx-row" style="cursor:pointer" onclick="openEdit(txns.find(x=>x._docId===\'' + esc(t._docId||'') + '\'))">'+
         '<div class="tx-dot '+t.type+'"></div>'+
         '<div class="tx-info"><div class="tx-note">'+esc(t.note)+'</div>'+
         '<div class="tx-meta"><span class="tx-time">'+esc(t.time||'')+'</span>'+
-        '<span class="badge '+t.type+'">'+CATS[t.type]+'</span>'+
+        '<span class="badge '+t.type+'">'+CATS[t.type]+'</span>'+(t.payment==='credit'?'<span class="tag" style="background:#FEF3C7;color:#D97706">💳 credit</span>':'')+
         (t.tags||[]).map(g=>'<span class="tag">'+esc(g)+'</span>').join('')+'</div></div>'+
         '<div class="tx-amount '+t.type+'">'+SIGN[t.type]+'฿'+f(t.amount)+'</div>'+
         '<button class="tx-delete" onclick="delTx('+t.id+',\''+esc(t._docId||'')+'\')">×</button>'+
@@ -779,6 +901,126 @@ function renderBreakdown(){
 }
 
 /* ── Utils ── */
+
+/* ── Edit Transaction ── */
+let _editTx=null, _editType='income', _editSelTags=[];
+
+
+let _editPayment='cash';
+function setEditPayment(p){
+  _editPayment=p;
+  document.getElementById('epay-cash').className='pay-btn'+(p==='cash'?' active-cash':'');
+  document.getElementById('epay-credit').className='pay-btn'+(p==='credit'?' active-credit':'');
+}
+function openEdit(tx){
+  _editTx=tx; _editType=tx.type; _editSelTags=[...(tx.tags||[])];
+  setEditType(tx.type);
+  document.getElementById('editAmt').value=tx.amount;
+  document.getElementById('editNote').value=tx.note;
+  document.getElementById('editDate').value=tx.date;
+  // show payment field for expense types
+  const epf=document.getElementById('editPayField');
+  if(epf) epf.style.display=EXPENSE_TYPES_PAY.includes(tx.type)?'block':'none';
+  _editPayment=tx.payment||'cash';
+  setEditPayment(_editPayment);
+  renderEditTags();
+  document.getElementById('editOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeEditModal(e){
+  if(e && e.target!==document.getElementById('editOverlay')) return;
+  document.getElementById('editOverlay').classList.remove('open');
+  document.body.style.overflow='';
+  _editTx=null;
+}
+
+function setEditType(t){
+  _editType=t;
+  ['income','daily','travel','fixed','utility','saving'].forEach(k=>{
+    document.getElementById('et-'+k).className='etb'+(k===t?' sel-'+k:'');
+  });
+  const epf=document.getElementById('editPayField');
+  if(epf) epf.style.display=EXPENSE_TYPES_PAY.includes(t)?'block':'none';
+}
+
+function renderEditTags(){
+  const wrap=document.getElementById('editTagPicker');
+  wrap.innerHTML='';
+  tags.forEach(t=>{
+    const c=document.createElement('span');
+    c.className='edit-tag-chip '+(_editSelTags.includes(t)?'on':'off');
+    c.textContent=t;
+    c.onclick=()=>{_editSelTags.includes(t)?_editSelTags=_editSelTags.filter(x=>x!==t):_editSelTags.push(t);renderEditTags();};
+    wrap.appendChild(c);
+  });
+}
+
+async function saveEditTx(){
+  if(!_editTx||!currentUser)return;
+  const amt=parseFloat(document.getElementById('editAmt').value);
+  const note=document.getElementById('editNote').value.trim();
+  const date=document.getElementById('editDate').value;
+  if(!amt||amt<=0){showNotif('กรุณากรอกจำนวนเงิน');return;}
+  if(!note){showNotif('กรุณากรอกรายละเอียด');return;}
+  try{
+    const ref=fb().doc(fb().db,'users',currentUser.uid,'transactions',_editTx._docId);
+    const editPayMethod = EXPENSE_TYPES_PAY.includes(_editType) ? _editPayment : null;
+    await fb().updateDoc(ref,{type:_editType,amount:amt,note,date,tags:[..._editSelTags],payment:editPayMethod});
+    document.getElementById('editOverlay').classList.remove('open');
+    document.body.style.overflow='';
+    showNotif('✓ แก้ไขแล้ว');
+  }catch(e){console.error(e);showNotif('แก้ไขไม่สำเร็จ');}
+}
+
+async function deleteEditTx(){
+  if(!_editTx||!confirm('ลบรายการนี้?'))return;
+  try{
+    await fb().deleteDoc(fb().doc(fb().db,'users',currentUser.uid,'transactions',_editTx._docId));
+    document.getElementById('editOverlay').classList.remove('open');
+    document.body.style.overflow='';
+    showNotif('ลบแล้ว');
+  }catch(e){showNotif('ลบไม่สำเร็จ');}
+}
+
+/* ── Payment Method ── */
+let _payment = 'cash'; // 'cash' or 'credit'
+const EXPENSE_TYPES_PAY = ['daily','travel','fixed','utility'];
+
+function setPayment(p){
+  _payment=p;
+  document.getElementById('pay-cash').className='pay-btn'+(p==='cash'?' active-cash':'');
+  document.getElementById('pay-credit').className='pay-btn'+(p==='credit'?' active-credit':'');
+}
+
+function updatePayToggle(){
+  const tog=document.getElementById('payToggle');
+  if(!tog)return;
+  tog.style.display=EXPENSE_TYPES_PAY.includes(curType)?'flex':'none';
+}
+
+function renderPaySummary(){
+  const now=new Date();
+  const m=txns.filter(t=>{const d=new Date(t.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  const expenses=m.filter(t=>EXPENSE_TYPES_PAY.includes(t.type));
+  const cashTxns=expenses.filter(t=>!t.payment||t.payment==='cash');
+  const creditTxns=expenses.filter(t=>t.payment==='credit');
+  const cashAmt=cashTxns.reduce((s,t)=>s+t.amount,0);
+  const creditAmt=creditTxns.reduce((s,t)=>s+t.amount,0);
+  const total=cashAmt+creditAmt;
+  set('payCash','฿'+f(cashAmt));
+  set('payCredit','฿'+f(creditAmt));
+  set('payCashSub',cashTxns.length+' รายการ');
+  set('payCreditSub',creditTxns.length+' รายการ');
+  const cashPct=total>0?Math.round(cashAmt/total*100):50;
+  const creditPct=100-cashPct;
+  const bc=document.getElementById('payBarCash');
+  const br=document.getElementById('payBarCredit');
+  const rl=document.getElementById('payRatioLbl');
+  if(bc)bc.style.width=cashPct+'%';
+  if(br)br.style.width=creditPct+'%';
+  if(rl)rl.textContent=total>0?'เงินสด '+cashPct+'% · บัตร '+creditPct+'%':'ยังไม่มีรายการ';
+}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 function sum(arr,type){return arr.filter(t=>t.type===type).reduce((s,t)=>s+t.amount,0);}
 function cnt(arr,type){return arr.filter(t=>t.type===type).length;}
@@ -789,7 +1031,7 @@ function dlCSV(){
   if(!txns.length){showNotif('ไม่มีข้อมูล');return;}
   const cm={income:'รายรับ',daily:'กิน/ช้อป',travel:'เดินทาง',fixed:'ผ่อน/บัตร/ประกัน',utility:'Utility',saving:'ออม'};
   const rows=txns.map(t=>{const d=new Date(t.date+'T00:00:00');return t.date+','+(t.time||'')+','+d.getFullYear()+','+(d.getMonth()+1)+','+cm[t.type]+','+t.amount+',"'+t.note+'","'+(t.tags||[]).join(';')+'"';});
-  const blob=new Blob(['\ufeff'+['วันที่,เวลา,ปี,เดือน,ประเภท,จำนวน,รายละเอียด,Tags',...rows].join('\n')],{type:'text/csv;charset=utf-8'});
+  const blob=new Blob(['\ufeff'+['วันที่,เวลา,ปี,เดือน,ประเภท,จำนวน,รายละเอียด,Tags,วิธีจ่าย',...rows].join('\n')],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='flow-transactions.csv';a.click();showNotif('✓ ดาวน์โหลด CSV แล้ว');
 }
 async function exportSheets(){
