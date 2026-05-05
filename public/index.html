@@ -857,12 +857,12 @@ function render(){
   const grp={};data.forEach(t=>{if(!grp[t.date])grp[t.date]=[];grp[t.date].push(t);});
   const sorted=Object.keys(grp).sort((a,b)=>b.localeCompare(a));
   el.innerHTML=sorted.map((date,i)=>{
-    const items=grp[date];
+    const items=grp[date].slice().sort((a,b)=>(b.time||'').localeCompare(a.time||''));
     const net=sum(items,'income')-sum(items,'daily')-sum(items,'travel')-sum(items,'fixed')-sum(items,'utility')-sum(items,'saving');
     const d=new Date(date+'T00:00:00');
     const lbl=d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
     return (i>0?'<div class="divider"></div>':'')+
-      '<div class="day-header"><span class="day-label">'+lbl+'</span><span class="day-total" style="color:'+(net>=0?'var(--income)':'var(--daily)')+'">'+f(net,true)+' ฿</span></div>'+
+      '<div class="day-header"><span class="day-label">'+lbl+'</span><span class="day-total" style="color:'+(net>0?'var(--income)':net<0?'var(--mid)':'var(--muted)')+'">'+f(net,true)+' ฿</span></div>'+
       items.map(t=>'<div class="tx-row" style="cursor:pointer" onclick="openEdit(txns.find(x=>x._docId===\'' + esc(t._docId||'') + '\'))">'+
         '<div class="tx-dot '+t.type+'"></div>'+
         '<div class="tx-info"><div class="tx-note">'+esc(t.note)+'</div>'+
@@ -1128,14 +1128,14 @@ function renderHistList(m){
   const sorted=Object.keys(grp).sort((a,b)=>b.localeCompare(a));
   el.innerHTML='';
   sorted.forEach((date,i)=>{
-    const items=grp[date];
+    const items=grp[date].slice().sort((a,b)=>(b.time||'').localeCompare(a.time||''));
     const net=sum(items,'income')-sum(items,'daily')-sum(items,'travel')-sum(items,'fixed')-sum(items,'utility')-sum(items,'saving');
     const d=new Date(date+'T00:00:00');
     const lbl=d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
     if(i>0){const div=document.createElement('div');div.className='divider';el.appendChild(div);}
     const hdr=document.createElement('div');
     hdr.className='day-header';
-    hdr.innerHTML='<span class="day-label">'+lbl+'</span><span class="day-total" style="color:'+(net>=0?'var(--income)':'var(--daily)')+'">'+f(net,true)+' ฿</span>';
+    hdr.innerHTML='<span class="day-label">'+lbl+'</span><span class="day-total" style="color:'+(net>0?'var(--income)':net<0?'var(--mid)':'var(--muted)')+'">'+f(net,true)+' ฿</span>';
     el.appendChild(hdr);
     items.forEach(t=>{
       const row=document.createElement('div');
