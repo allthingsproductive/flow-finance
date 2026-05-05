@@ -294,6 +294,22 @@ footer{padding:18px 0 12px;text-align:center;font-size:10px;color:var(--muted);b
   .type-bar-btn{font-size:10px}
   .type-bar-btn .tbi{font-size:14px}
 }
+
+/* History Modal */
+.hist-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:800;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.hist-overlay.open{opacity:1;pointer-events:auto}
+.hist-modal{background:var(--surface);border-radius:16px 16px 0 0;width:100%;max-width:700px;max-height:88vh;display:flex;flex-direction:column;transform:translateY(30px);transition:transform .25s;box-shadow:0 -4px 32px rgba(0,0,0,.15)}
+.hist-overlay.open .hist-modal{transform:translateY(0)}
+.hist-modal-header{padding:16px 20px 12px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.hist-modal-title{font-size:14px;font-weight:500;color:var(--text)}
+.hist-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:2px 6px;border-radius:4px;line-height:1}
+.hist-month-tabs{display:flex;gap:4px;padding:10px 16px;overflow-x:auto;border-bottom:1px solid var(--border-light);flex-shrink:0}
+.hist-month-tabs::-webkit-scrollbar{display:none}
+.hist-tab{padding:4px 12px;border-radius:100px;font-size:11px;font-family:'DM Sans',sans-serif;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;white-space:nowrap;transition:all .15s}
+.hist-tab.active{background:var(--text);color:#fff;border-color:var(--text)}
+.hist-list{overflow-y:auto;flex:1}
+.hist-list::-webkit-scrollbar{width:3px}
+.hist-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 </style>
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -830,13 +846,20 @@ function render(){
   if(curFilter!=='all')data=data.filter(t=>t.type===curFilter);
   if(activeTag)data=data.filter(t=>t.tags&&t.tags.includes(activeTag));
   if(q)data=data.filter(t=>t.note.toLowerCase().includes(q)||(t.tags||[]).some(g=>g.toLowerCase().includes(q)));
+  // กรองแค่ 7 วันล่าสุด เมื่อไม่ได้ filter/ค้นหา
+  const isFiltered=curFilter!=='all'||activeTag||q;
+  if(!isFiltered){
+    const cutoff=new Date();cutoff.setDate(cutoff.getDate()-6);cutoff.setHours(0,0,0,0);
+    const cutoffStr=cutoff.toISOString().slice(0,10);
+    data=data.filter(t=>t.date>=cutoffStr);
+  }
   const el=document.getElementById('txList');
-  if(!data.length){el.innerHTML='<div class="empty">📋 '+(txns.length?'ไม่พบรายการ':'ยังไม่มีรายการ — เพิ่มรายการแรก!')+'</div>';return;}
+  if(!data.length){el.innerHTML='<div class="empty">📋 '+(txns.length?'ไม่พบรายการ':'ยังไม่มีรายการ — เพิ่มรายการแรก!')+'</div>';renderHistoryBtn();return;}
   const grp={};data.forEach(t=>{if(!grp[t.date])grp[t.date]=[];grp[t.date].push(t);});
   const sorted=Object.keys(grp).sort((a,b)=>b.localeCompare(a));
   el.innerHTML=sorted.map((date,i)=>{
     const items=grp[date];
-    const net=sum(items,'income')-sum(items,'daily')-sum(items,'fixed');
+    const net=sum(items,'income')-sum(items,'daily')-sum(items,'travel')-sum(items,'fixed')-sum(items,'utility')-sum(items,'saving');
     const d=new Date(date+'T00:00:00');
     const lbl=d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
     return (i>0?'<div class="divider"></div>':'')+
@@ -846,11 +869,30 @@ function render(){
         '<div class="tx-info"><div class="tx-note">'+esc(t.note)+'</div>'+
         '<div class="tx-meta"><span class="tx-time">'+esc(t.time||'')+'</span>'+
         '<span class="badge '+t.type+'">'+CATS[t.type]+'</span>'+(t.payment==='credit'?'<span class="tag" style="background:#FEF3C7;color:#D97706">💳 credit</span>':'')+
-        (t.tags||[]).map(g=>'<span class="tag">'+esc(g)+'</span>').join('')+'</div></div>'+
+        '</div></div>'+
         '<div class="tx-amount '+t.type+'">'+SIGN[t.type]+'฿'+f(t.amount)+'</div>'+
-        '<button class="tx-delete" onclick="delTx('+t.id+',\''+esc(t._docId||'')+'\')">×</button>'+
+        '<button class="tx-delete" onclick="delTx('+t.id+',\''+esc(t._docId||'')+'\')" >×</button>'+
       '</div>').join('');
   }).join('');
+  renderHistoryBtn();
+}
+function renderHistoryBtn(){
+  const q=document.getElementById('searchInput').value.trim();
+  const isFiltered=curFilter!=='all'||activeTag||q;
+  if(isFiltered)return;
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-6);cutoff.setHours(0,0,0,0);
+  const cutoffStr=cutoff.toISOString().slice(0,10);
+  const hasOld=txns.some(t=>t.date<cutoffStr);
+  if(!hasOld)return;
+  const el=document.getElementById('txList');
+  const wrap=document.createElement('div');
+  wrap.style.cssText='padding:12px 16px;text-align:center;border-top:1px solid var(--border-light)';
+  const btn=document.createElement('button');
+  btn.textContent='ดูรายการเก่า →';
+  btn.style.cssText='background:none;border:1px solid var(--border);border-radius:100px;padding:6px 18px;font-size:12px;font-family:DM Sans,sans-serif;color:var(--mid);cursor:pointer';
+  btn.onclick=openHistory;
+  wrap.appendChild(btn);
+  el.appendChild(wrap);
 }
 function renderTagMgr(){
   const el=document.getElementById('tagMgr');
@@ -1043,6 +1085,100 @@ async function exportSheets(){
   catch(e){s.innerHTML='<div style="font-size:10px;margin-top:5px;color:var(--daily)">เกิดข้อผิดพลาด</div>';}
 }
 function toggleScript(){const c=document.getElementById('scCode'),t=document.querySelector('.sc-toggle');if(c.style.display==='block'){c.style.display='none';t.textContent='▶ วิธีตั้งค่า Apps Script';}else{c.style.display='block';t.textContent='▼ วิธีตั้งค่า Apps Script';}}
+
+/* ── History Modal ── */
+let _histMonth = null;
+function openHistory(){
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-6);cutoff.setHours(0,0,0,0);
+  const cutoffStr=cutoff.toISOString().slice(0,10);
+  const months={};
+  txns.filter(t=>t.date<cutoffStr).forEach(t=>{
+    const m=t.date.slice(0,7);
+    if(!months[m])months[m]=0;
+    months[m]++;
+  });
+  const sorted=Object.keys(months).sort((a,b)=>b.localeCompare(a));
+  if(!sorted.length){showNotif('ไม่มีรายการย้อนหลัง');return;}
+  const tabsEl=document.getElementById('histMonthTabs');
+  tabsEl.innerHTML='';
+  sorted.forEach(m=>{
+    const d=new Date(m+'-01T00:00:00');
+    const lbl=d.toLocaleDateString('th-TH',{month:'long',year:'2-digit'});
+    const btn=document.createElement('button');
+    btn.className='hist-tab';
+    btn.dataset.m=m;
+    btn.textContent=lbl;
+    btn.onclick=()=>selectHistMonth(m);
+    tabsEl.appendChild(btn);
+  });
+  selectHistMonth(sorted[0]);
+  document.getElementById('histOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function selectHistMonth(m){
+  _histMonth=m;
+  document.querySelectorAll('.hist-tab').forEach(b=>b.classList.toggle('active',b.dataset.m===m));
+  renderHistList(m);
+}
+function renderHistList(m){
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-6);cutoff.setHours(0,0,0,0);
+  const cutoffStr=cutoff.toISOString().slice(0,10);
+  const data=txns.filter(t=>t.date.startsWith(m)&&t.date<cutoffStr);
+  const el=document.getElementById('histList');
+  if(!data.length){el.innerHTML='<div class="empty">ไม่มีรายการ</div>';return;}
+  const grp={};data.forEach(t=>{if(!grp[t.date])grp[t.date]=[];grp[t.date].push(t);});
+  const sorted=Object.keys(grp).sort((a,b)=>b.localeCompare(a));
+  el.innerHTML='';
+  sorted.forEach((date,i)=>{
+    const items=grp[date];
+    const net=sum(items,'income')-sum(items,'daily')-sum(items,'travel')-sum(items,'fixed')-sum(items,'utility')-sum(items,'saving');
+    const d=new Date(date+'T00:00:00');
+    const lbl=d.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
+    if(i>0){const div=document.createElement('div');div.className='divider';el.appendChild(div);}
+    const hdr=document.createElement('div');
+    hdr.className='day-header';
+    hdr.innerHTML='<span class="day-label">'+lbl+'</span><span class="day-total" style="color:'+(net>=0?'var(--income)':'var(--daily)')+'">'+f(net,true)+' ฿</span>';
+    el.appendChild(hdr);
+    items.forEach(t=>{
+      const row=document.createElement('div');
+      row.className='tx-row';
+      row.style.cursor='pointer';
+      row.innerHTML=
+        '<div class="tx-dot '+t.type+'"></div>'+
+        '<div class="tx-info"><div class="tx-note">'+esc(t.note)+'</div>'+
+        '<div class="tx-meta"><span class="tx-time">'+esc(t.time||'')+'</span>'+
+        '<span class="badge '+t.type+'">'+CATS[t.type]+'</span>'+(t.payment==='credit'?'<span class="tag" style="background:#FEF3C7;color:#D97706">💳 credit</span>':'')+
+        '</div></div>'+
+        '<div class="tx-amount '+t.type+'">'+SIGN[t.type]+'฿'+f(t.amount)+'</div>'+
+        '<button class="tx-delete hist-del-btn">×</button>';
+      row.querySelector('.tx-delete').addEventListener('click',function(e){
+        e.stopPropagation();
+        delTx(t.id,t._docId);
+      });
+      row.addEventListener('click',function(){
+        _closeHistory();
+        setTimeout(()=>openEdit(txns.find(x=>x._docId===t._docId)),150);
+      });
+      el.appendChild(row);
+    });
+  });
+}
+function closeHistory(e){if(e&&e.target!==document.getElementById('histOverlay'))return;_closeHistory();}
+function closeHistoryBtn(){_closeHistory();}
+function _closeHistory(){document.getElementById('histOverlay').classList.remove('open');document.body.style.overflow='';}
+
 </script>
+
+<!-- History Modal -->
+<div class="hist-overlay" id="histOverlay" onclick="closeHistory(event)">
+  <div class="hist-modal">
+    <div class="hist-modal-header">
+      <span class="hist-modal-title">รายการย้อนหลัง</span>
+      <button class="hist-close" onclick="closeHistoryBtn()">×</button>
+    </div>
+    <div class="hist-month-tabs" id="histMonthTabs"></div>
+    <div class="hist-list" id="histList"></div>
+  </div>
+</div>
 </body>
 </html>
