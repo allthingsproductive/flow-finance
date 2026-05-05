@@ -439,8 +439,7 @@ window.signOutUser=async function(){
           <button class="filter-chip fc-fixed" onclick="setFilter('fixed',this)">💳 ผ่อน/บัตร</button>
           <button class="filter-chip fc-utility" onclick="setFilter('utility',this)">🏠 Utility</button>
           <button class="filter-chip fc-saving" onclick="setFilter('saving',this)">🏦 ออม</button>
-          <div style="flex:1"></div>
-          <span id="tagFilters" style="display:flex;gap:3px;flex-wrap:wrap"></span>
+
         </div>
         <div class="tx-list-scroll"><div id="txList"></div></div>
       </div>
@@ -869,7 +868,7 @@ function render(){
         '<div class="tx-info"><div class="tx-note">'+esc(t.note)+'</div>'+
         '<div class="tx-meta"><span class="tx-time">'+esc(t.time||'')+'</span>'+
         '<span class="badge '+t.type+'">'+CATS[t.type]+'</span>'+(t.payment==='credit'?'<span class="tag" style="background:#FEF3C7;color:#D97706">💳 credit</span>':'')+
-        '</div></div>'+
+        (t.tags||[]).map(g=>'<span class="tag">'+esc(g)+'</span>').join('')+'</div></div>'+
         '<div class="tx-amount '+t.type+'">'+SIGN[t.type]+'฿'+f(t.amount)+'</div>'+
         '<button class="tx-delete" onclick="delTx('+t.id+',\''+esc(t._docId||'')+'\')" >×</button>'+
       '</div>').join('');
@@ -898,7 +897,6 @@ function renderTagMgr(){
   const el=document.getElementById('tagMgr');
   el.innerHTML=tags.map(t=>'<div class="mt"><span style="cursor:pointer" onclick="filterTag(\''+esc(t)+'\')">'+(activeTag===t?'<u>'+esc(t)+'</u>':esc(t))+'</span><button onclick="delTag(event,\''+esc(t)+'\')">×</button></div>').join('');
   document.getElementById('tagCount').textContent=tags.length+' tags';
-  document.getElementById('tagFilters').innerHTML=tags.slice(0,4).map(t=>'<span class="filter-chip fc-all '+(activeTag===t?'active':'')+'" onclick="filterTag(\''+esc(t)+'\')" style="font-size:9px">#'+esc(t)+'</span>').join('');
 }
 function filterTag(t){activeTag=activeTag===t?null:t;render();renderTagMgr();}
 function delTag(e,t){e.stopPropagation();if(!confirm('ลบ tag "'+t+'"?'))return;tags=tags.filter(x=>x!==t);saveTags();selTags=selTags.filter(x=>x!==t);renderTagMgr();renderTagPicker();}
@@ -1148,7 +1146,7 @@ function renderHistList(m){
         '<div class="tx-info"><div class="tx-note">'+esc(t.note)+'</div>'+
         '<div class="tx-meta"><span class="tx-time">'+esc(t.time||'')+'</span>'+
         '<span class="badge '+t.type+'">'+CATS[t.type]+'</span>'+(t.payment==='credit'?'<span class="tag" style="background:#FEF3C7;color:#D97706">💳 credit</span>':'')+
-        '</div></div>'+
+        (t.tags||[]).map(g=>'<span class="tag">'+esc(g)+'</span>').join('')+'</div></div>'+
         '<div class="tx-amount '+t.type+'">'+SIGN[t.type]+'฿'+f(t.amount)+'</div>'+
         '<button class="tx-delete hist-del-btn">×</button>';
       row.querySelector('.tx-delete').addEventListener('click',function(e){
