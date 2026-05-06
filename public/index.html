@@ -1426,6 +1426,12 @@ function setIncomeType(t){
     const btn=document.getElementById('btn-'+k);
     if(btn) btn.className='type-bar-btn'+(k===t?' sel-'+k:'');
   });
+  _incomeSelTags=[];
+  _incomeNoteAutofilled=false;
+  const noteInp=document.getElementById('noteInpIncome');
+  const noteRow=document.getElementById('noteRowIncome');
+  if(noteInp){noteInp.value='';noteInp.style.color='';}
+  if(noteRow){noteRow.style.borderColor='';noteRow.style.background='';}
   renderTagPickerIncome();
 }
 function setDateShortcutIncome(mode){
