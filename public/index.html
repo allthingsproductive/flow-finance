@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F7F6F3;--surface:#fff;--border:#E8E6E1;--border-light:#F0EEE9;--text:#1A1916;--mid:#6B6860;--muted:#A09D97;--income:#2D6A4F;--income-bg:#E8F5EE;--daily:#C44B3B;--daily-bg:#FBF0EE;--fixed:#8B5E3C;--fixed-bg:#F7F0E8;--saving:#3A6EA8;--saving-bg:#EBF0F8;--tag-bg:#EEECEA;--tag-text:#5A5750;--utility:#6B46C1;--utility-bg:#F5F3FF;--travel:#0369A1;--travel-bg:#EFF6FF;--personal:#0E7490;--personal-bg:#ECFEFF;--sh:0 1px 3px rgba(0,0,0,.06);--sh-md:0 4px 16px rgba(0,0,0,.1);--r:8px;--rs:5px}
+:root{--bg:#F7F6F3;--surface:#fff;--border:#E8E6E1;--border-light:#F0EEE9;--text:#1A1916;--mid:#6B6860;--muted:#A09D97;--income:#2D6A4F;--income-bg:#E8F5EE;--daily:#C44B3B;--daily-bg:#FBF0EE;--shop:#B5366E;--shop-bg:#FDF0F5;--fixed:#8B5E3C;--fixed-bg:#F7F0E8;--saving:#3A6EA8;--saving-bg:#EBF0F8;--tag-bg:#EEECEA;--tag-text:#5A5750;--utility:#6B46C1;--utility-bg:#F5F3FF;--travel:#0369A1;--travel-bg:#EFF6FF;--personal:#0E7490;--personal-bg:#ECFEFF;--sh:0 1px 3px rgba(0,0,0,.06);--sh-md:0 4px 16px rgba(0,0,0,.1);--r:8px;--rs:5px}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
 .app{max-width:960px;margin:0 auto;padding:0 20px 48px}
 header{display:flex;align-items:center;justify-content:space-between;padding:26px 0 0}
@@ -37,7 +37,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .type-bar-btn::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
 .type-bar-btn.sel-income{background:#f0faf5;color:var(--income)}.type-bar-btn.sel-income::after{background:var(--income)}
 .type-bar-btn.sel-daily{background:var(--daily-bg);color:var(--daily)}.type-bar-btn.sel-daily::after{background:var(--daily)}
-.type-bar-btn.sel-shop{background:var(--daily-bg);color:var(--daily)}.type-bar-btn.sel-shop::after{background:var(--daily)}
+.type-bar-btn.sel-shop{background:var(--shop-bg);color:var(--shop)}.type-bar-btn.sel-shop::after{background:var(--shop)}
 .type-bar-btn.sel-fixed{background:var(--fixed-bg);color:var(--fixed)}.type-bar-btn.sel-fixed::after{background:var(--fixed)}
 .type-bar-btn.sel-saving{background:var(--saving-bg);color:var(--saving)}.type-bar-btn.sel-saving::after{background:var(--saving)}
 .type-bar-btn.sel-utility{background:var(--utility-bg);color:var(--utility)}.type-bar-btn.sel-utility::after{background:var(--utility)}
@@ -92,6 +92,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .fc-saving.active{background:var(--saving);color:#fff;border-color:var(--saving)}
 .fc-travel.active{background:var(--travel);color:#fff;border-color:var(--travel)}
 .fc-utility.active{background:var(--utility);color:#fff;border-color:var(--utility)}
+.fc-shop.active{background:var(--shop);color:#fff;border-color:var(--shop)}
 .fc-personal.active{background:var(--personal);color:#fff;border-color:var(--personal)}
 .search-input{padding:3px 9px;border-radius:100px;font-size:11px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;width:110px;outline:none}
 .tx-list-scroll{max-height:480px;overflow-y:auto}
@@ -104,16 +105,16 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .tx-row:hover{background:var(--bg)}
 .tx-row:last-child{border-bottom:none}
 .tx-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.tx-dot.income{background:var(--income)}.tx-dot.daily{background:var(--daily)}.tx-dot.shop{background:var(--daily)}.tx-dot.travel{background:var(--travel)}.tx-dot.fixed{background:var(--fixed)}.tx-dot.utility{background:var(--utility)}.tx-dot.saving{background:var(--saving)}.tx-dot.personal{background:var(--personal)}
+.tx-dot.income{background:var(--income)}.tx-dot.daily{background:var(--daily)}.tx-dot.shop{background:var(--shop)}.tx-dot.travel{background:var(--travel)}.tx-dot.fixed{background:var(--fixed)}.tx-dot.utility{background:var(--utility)}.tx-dot.saving{background:var(--saving)}.tx-dot.personal{background:var(--personal)}
 .tx-info{flex:1;min-width:0}
 .tx-note{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tx-meta{display:flex;align-items:center;gap:4px;margin-top:2px;flex-wrap:wrap}
 .tx-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
 .badge{padding:1px 5px;border-radius:3px;font-size:9px;font-weight:500}
-.badge.income{background:var(--income-bg);color:var(--income)}.badge.daily{background:var(--daily-bg);color:var(--daily)}.badge.shop{background:var(--daily-bg);color:var(--daily)}.badge.travel{background:var(--travel-bg);color:var(--travel)}.badge.fixed{background:var(--fixed-bg);color:var(--fixed)}.badge.utility{background:var(--utility-bg);color:var(--utility)}.badge.saving{background:var(--saving-bg);color:var(--saving)}.badge.personal{background:var(--personal-bg);color:var(--personal)}
+.badge.income{background:var(--income-bg);color:var(--income)}.badge.daily{background:var(--daily-bg);color:var(--daily)}.badge.shop{background:var(--shop-bg);color:var(--shop)}.badge.travel{background:var(--travel-bg);color:var(--travel)}.badge.fixed{background:var(--fixed-bg);color:var(--fixed)}.badge.utility{background:var(--utility-bg);color:var(--utility)}.badge.saving{background:var(--saving-bg);color:var(--saving)}.badge.personal{background:var(--personal-bg);color:var(--personal)}
 .tag{padding:1px 5px;border-radius:3px;background:var(--tag-bg);color:var(--tag-text);font-size:10px}
 .tx-amount{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;white-space:nowrap}
-.tx-amount.income{color:var(--income)}.tx-amount.daily{color:var(--daily)}.tx-amount.shop{color:var(--daily)}.tx-amount.travel{color:var(--travel)}.tx-amount.fixed{color:var(--fixed)}.tx-amount.utility{color:var(--utility)}.tx-amount.saving{color:var(--saving)}.tx-amount.personal{color:var(--personal)}
+.tx-amount.income{color:var(--income)}.tx-amount.daily{color:var(--daily)}.tx-amount.shop{color:var(--shop)}.tx-amount.travel{color:var(--travel)}.tx-amount.fixed{color:var(--fixed)}.tx-amount.utility{color:var(--utility)}.tx-amount.saving{color:var(--saving)}.tx-amount.personal{color:var(--personal)}
 .tx-delete{opacity:0;background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:2px 4px;border-radius:3px;transition:all .15s}
 .tx-row:hover .tx-delete{opacity:1}
 .tx-delete:hover{background:var(--daily-bg);color:var(--daily)}
@@ -295,7 +296,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .etb:last-child{border-right:none}
 .etb.sel-income{background:var(--income-bg);color:var(--income)}
 .etb.sel-daily{background:var(--daily-bg);color:var(--daily)}
-.etb.sel-shop{background:var(--daily-bg);color:var(--daily)}
+.etb.sel-shop{background:var(--shop-bg);color:var(--shop)}
 .etb.sel-travel{background:var(--travel-bg);color:var(--travel)}
 .etb.sel-fixed{background:var(--fixed-bg);color:var(--fixed)}
 .etb.sel-utility{background:var(--utility-bg);color:var(--utility)}
@@ -921,9 +922,9 @@ function renderTagPicker(){
   wrap.appendChild(inp);
 }
 let _noteAutofilled=false;
-const TYPE_COLOR={'income':'var(--income)','daily':'var(--daily)','shop':'var(--daily)','travel':'var(--travel)','fixed':'var(--fixed)','utility':'var(--utility)','saving':'var(--saving)','personal':'var(--personal)'};
-const TYPE_COLOR_BG={'income':'var(--income-bg)','daily':'var(--daily-bg)','shop':'var(--daily-bg)','travel':'var(--travel-bg)','fixed':'var(--fixed-bg)','utility':'var(--utility-bg)','saving':'var(--saving-bg)','personal':'var(--personal-bg)'};
-const TYPE_BORDER={'income':'var(--income)','daily':'var(--daily)','shop':'var(--daily)','travel':'var(--travel)','fixed':'var(--fixed)','utility':'var(--utility)','saving':'var(--saving)','personal':'var(--personal)'};
+const TYPE_COLOR={'income':'var(--income)','daily':'var(--daily)','shop':'var(--shop)','travel':'var(--travel)','fixed':'var(--fixed)','utility':'var(--utility)','saving':'var(--saving)','personal':'var(--personal)'};
+const TYPE_COLOR_BG={'income':'var(--income-bg)','daily':'var(--daily-bg)','shop':'var(--shop-bg)','travel':'var(--travel-bg)','fixed':'var(--fixed-bg)','utility':'var(--utility-bg)','saving':'var(--saving-bg)','personal':'var(--personal-bg)'};
+const TYPE_BORDER={'income':'var(--income)','daily':'var(--daily)','shop':'var(--shop)','travel':'var(--travel)','fixed':'var(--fixed)','utility':'var(--utility)','saving':'var(--saving)','personal':'var(--personal)'};
 function updateNoteAutofill(){
   const noteInp=document.getElementById('noteInp');
   const noteRow=document.getElementById('noteRow');
@@ -1051,7 +1052,7 @@ function renderHistoryBtn(){
 const CAT_CFG=[
   {k:'income',lbl:'รายรับ',color:'var(--income)'},
   {k:'daily',lbl:'กิน',color:'var(--daily)'},
-  {k:'shop',lbl:'ช้อป',color:'var(--daily)'},
+  {k:'shop',lbl:'ช้อป',color:'var(--shop)'},
   {k:'travel',lbl:'เดินทาง',color:'var(--travel)'},
   {k:'fixed',lbl:'ผ่อน',color:'var(--fixed)'},
   {k:'utility',lbl:'Utility',color:'var(--utility)'},
@@ -1100,10 +1101,12 @@ function renderNewTagCatPills(){
   CAT_CFG.forEach(cfg=>{
     const on=_newTagCats.includes(cfg.k);
     const pill=document.createElement('button');
+    pill.type='button';
     pill.className='ntag-cat-pill'+(on?' on':'');
-    if(on){pill.style.background=cfg.color;}
+    if(on){pill.style.background=cfg.color;pill.style.color='#fff';}
     pill.textContent=cfg.lbl;
-    pill.onclick=()=>{
+    pill.onclick=(e)=>{
+      e.stopPropagation();
       const i=_newTagCats.indexOf(cfg.k);
       if(i>=0)_newTagCats.splice(i,1);else _newTagCats.push(cfg.k);
       renderNewTagCatPills();
@@ -1471,6 +1474,23 @@ function dpPickIncome(yr,mo,d){
   document.getElementById('sc-today-income').classList.remove('active');
   document.getElementById('sc-yesterday-income').classList.remove('active');
 }
+let _incomeNoteAutofilled=false;
+function updateIncomeNoteAutofill(){
+  const noteInp=document.getElementById('noteInpIncome');
+  const noteRow=document.getElementById('noteRowIncome');
+  if(!noteInp||!noteRow)return;
+  if(_incomeSelTags.length>0&&(_incomeNoteAutofilled||noteInp.value==='')){
+    noteInp.value=_incomeSelTags.join(', ');
+    noteInp.style.color=TYPE_COLOR[_incomeType]||'var(--income)';
+    noteRow.style.borderColor=TYPE_BORDER[_incomeType]||'var(--income)';
+    noteRow.style.background=TYPE_COLOR_BG[_incomeType]||'var(--income-bg)';
+    _incomeNoteAutofilled=true;
+  } else if(_incomeSelTags.length===0&&_incomeNoteAutofilled){
+    noteInp.value='';noteInp.style.color='';
+    noteRow.style.borderColor='';noteRow.style.background='';
+    _incomeNoteAutofilled=false;
+  }
+}
 function renderTagPickerIncome(){
   const wrap=document.getElementById('tagPickerIncome');
   const inp=document.getElementById('tagNewInpIncome');
@@ -1480,7 +1500,7 @@ function renderTagPickerIncome(){
   visible.forEach(tObj=>{
     const t=tObj.name;
     const c=document.createElement('span');c.className='qa-tag-chip'+(_incomeSelTags.includes(t)?' on':'');c.textContent=t;
-    c.onclick=()=>{_incomeSelTags.includes(t)?_incomeSelTags=_incomeSelTags.filter(x=>x!==t):_incomeSelTags.push(t);renderTagPickerIncome();};
+    c.onclick=()=>{_incomeSelTags.includes(t)?_incomeSelTags=_incomeSelTags.filter(x=>x!==t):_incomeSelTags.push(t);renderTagPickerIncome();updateIncomeNoteAutofill();};
     wrap.appendChild(c);
   });
   wrap.appendChild(inp);
@@ -1495,8 +1515,12 @@ async function addTxIncome(){
   if(!note){showNotif('กรุณากรอกรายละเอียดหรือเลือก tag');return;}
   try{
     await fb().addDoc(userCol('transactions'),{id:Date.now(),type:_incomeType,amount:amt,note,date,tags:[..._incomeSelTags],payment:null,time:new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})});
-    document.getElementById('amtInpIncome').value='';document.getElementById('noteInpIncome').value='';
-    _incomeSelTags=[];renderTagPickerIncome();
+    document.getElementById('amtInpIncome').value='';
+    document.getElementById('noteInpIncome').value='';
+    document.getElementById('noteInpIncome').style.color='';
+    document.getElementById('noteRowIncome').style.borderColor='';
+    document.getElementById('noteRowIncome').style.background='';
+    _incomeSelTags=[];_incomeNoteAutofilled=false;renderTagPickerIncome();
     showNotif('✓ บันทึก'+CATS[_incomeType]+'แล้ว');
   }catch(e){console.error(e);showNotif('บันทึกไม่สำเร็จ กรุณาลองใหม่');}
 }
