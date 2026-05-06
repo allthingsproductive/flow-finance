@@ -37,6 +37,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .type-bar-btn::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
 .type-bar-btn.sel-income{background:#f0faf5;color:var(--income)}.type-bar-btn.sel-income::after{background:var(--income)}
 .type-bar-btn.sel-daily{background:var(--daily-bg);color:var(--daily)}.type-bar-btn.sel-daily::after{background:var(--daily)}
+.type-bar-btn.sel-shop{background:var(--daily-bg);color:var(--daily)}.type-bar-btn.sel-shop::after{background:var(--daily)}
 .type-bar-btn.sel-fixed{background:var(--fixed-bg);color:var(--fixed)}.type-bar-btn.sel-fixed::after{background:var(--fixed)}
 .type-bar-btn.sel-saving{background:var(--saving-bg);color:var(--saving)}.type-bar-btn.sel-saving::after{background:var(--saving)}
 .type-bar-btn.sel-utility{background:var(--utility-bg);color:var(--utility)}.type-bar-btn.sel-utility::after{background:var(--utility)}
@@ -294,10 +295,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .etb:last-child{border-right:none}
 .etb.sel-income{background:var(--income-bg);color:var(--income)}
 .etb.sel-daily{background:var(--daily-bg);color:var(--daily)}
+.etb.sel-shop{background:var(--daily-bg);color:var(--daily)}
 .etb.sel-travel{background:var(--travel-bg);color:var(--travel)}
 .etb.sel-fixed{background:var(--fixed-bg);color:var(--fixed)}
 .etb.sel-utility{background:var(--utility-bg);color:var(--utility)}
 .etb.sel-saving{background:var(--saving-bg);color:var(--saving)}
+.etb.sel-personal{background:var(--personal-bg);color:var(--personal)}
 .edit-field{margin-bottom:10px}
 .edit-field label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
 .edit-field input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
@@ -687,7 +690,7 @@ function doPost(e){
         <button class="etb" id="et-utility" onclick="setEditType('utility')">🏠 Utility</button>
         <button class="etb" id="et-personal" onclick="setEditType('personal')">🌱 ดูแล/พัฒนาฯ</button>
       </div>
-      <div class="edit-type-bar-row2">
+      <div class="edit-type-bar-row2" style="grid-template-columns:repeat(2,1fr)">
         <button class="etb" id="et-fixed" onclick="setEditType('fixed')">💳 ผ่อน</button>
         <button class="etb" id="et-saving" onclick="setEditType('saving')">🏦 ออม</button>
       </div>
@@ -734,8 +737,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   setDateShortcutIncome('today');
   setType('daily');
   document.addEventListener('click',e=>{
-    const w=document.querySelector('.dp-wrap');if(w&&!w.contains(e.target))dpClose();
-    const wi=document.getElementById('dpDropdownIncome');if(wi&&!wi.closest('.dp-wrap')?.contains(e.target))wi.classList.remove('open');
+    const w=document.querySelector('#tab-record .dp-wrap');if(w&&!w.contains(e.target))dpClose();
+    const wIncome=document.querySelector('#tab-income .dp-wrap');const wiDrop=document.getElementById('dpDropdownIncome');if(wIncome&&wiDrop&&!wIncome.contains(e.target))wiDrop.classList.remove('open');
     const nd=document.getElementById('newTagDrop');
     const nw=document.getElementById('newTagWrap');
     if(nd&&nw&&!nw.contains(e.target))nd.classList.remove('open');
