@@ -195,7 +195,8 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .cl{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)}
 
 /* Summary tab */
-.sum3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+@media(min-width:680px){.sum3{grid-template-columns:repeat(5,1fr)}}
 .sum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
 .sum-card.c-daily{border-left:3px solid var(--daily)}.sum-card.c-fixed{border-left:3px solid var(--fixed)}.sum-card.c-saving{border-left:3px solid var(--saving)}
 .sum-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px;font-weight:500}
@@ -536,7 +537,7 @@ function doPost(e){
   var sh=SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var d=JSON.parse(e.postData.contents);
   if(sh.getLastRow()===0)sh.appendRow(['วันที่','เวลา','ประเภท','จำนวน','รายละเอียด','Tags']);
-  var cm={income:'รายรับ',daily:'กิน/ช้อป',fixed:'ผ่อน/บัตร',saving:'ออม'};
+  var cm={income:'รายรับ',daily:'กิน/ช้อป',travel:'เดินทาง',fixed:'ผ่อน/บัตร',utility:'Utility',saving:'ออม'};
   d.transactions.forEach(function(t){sh.appendRow([t.date,t.time,cm[t.type],t.amount,t.note,(t.tags||[]).join(', ')]);});
   return ContentService.createTextOutput('OK').setMimeType(ContentService.MimeType.TEXT);
 }
@@ -549,7 +550,9 @@ function doPost(e){
 <div class="tab-pane" id="tab-summary">
   <div class="sum3">
     <div class="sum-card c-daily"><div class="sum-label">🍜 กิน &amp; ช้อปปิ้ง</div><div class="sum-amount" style="color:var(--daily)" id="sDaily">฿0</div><div class="sum-sub" id="sDailySub">รายจ่ายประจำวัน</div></div>
-    <div class="sum-card c-fixed"><div class="sum-label">💳 รายจ่ายอื่นๆ</div><div class="sum-amount" style="color:var(--fixed)" id="sFixed">฿0</div><div class="sum-sub" id="sFixedSub">ผ่อน / บัตร / ประกัน</div></div>
+    <div class="sum-card" style="border-left:3px solid var(--travel)"><div class="sum-label">🚗 เดินทาง</div><div class="sum-amount" style="color:var(--travel)" id="sTravel">฿0</div><div class="sum-sub" id="sTravelSub">ค่าเดินทาง</div></div>
+    <div class="sum-card c-fixed"><div class="sum-label">💳 ผ่อน / บัตร</div><div class="sum-amount" style="color:var(--fixed)" id="sFixed">฿0</div><div class="sum-sub" id="sFixedSub">ผ่อน / บัตร / ประกัน</div></div>
+    <div class="sum-card" style="border-left:3px solid var(--utility)"><div class="sum-label">🏠 Utility</div><div class="sum-amount" style="color:var(--utility)" id="sUtility">฿0</div><div class="sum-sub" id="sUtilitySub">น้ำ / ไฟ / เน็ต</div></div>
     <div class="sum-card c-saving"><div class="sum-label">🏦 ออม / เตรียมจ่าย</div><div class="sum-amount" style="color:var(--saving)" id="sSaving">฿0</div><div class="sum-sub" id="sSavingSub">ยังอยู่กับเรา</div></div>
   </div>
   <div class="net-bar">
@@ -557,8 +560,10 @@ function doPost(e){
     <div class="net-arrow">→</div>
     <div class="net-breakdown">
       <div class="nb-item">กิน/ช้อป <span id="nb1" style="color:var(--daily)">฿0</span></div>
-      <div class="nb-item">รายจ่ายอื่น <span id="nb2" style="color:var(--fixed)">฿0</span></div>
-      <div class="nb-item">ออม <span id="nb3" style="color:var(--saving)">฿0</span></div>
+      <div class="nb-item">เดินทาง <span id="nb2" style="color:var(--travel)">฿0</span></div>
+      <div class="nb-item">ผ่อน/บัตร <span id="nb3" style="color:var(--fixed)">฿0</span></div>
+      <div class="nb-item">Utility <span id="nb4" style="color:var(--utility)">฿0</span></div>
+      <div class="nb-item">ออม <span id="nb5" style="color:var(--saving)">฿0</span></div>
     </div>
     <div class="net-arrow">→</div>
     <div style="text-align:right"><div class="net-seg-label">เงินเหลือจริง</div><div class="net-seg-val" id="sNet">฿0</div></div>
@@ -910,10 +915,10 @@ function renderMonthStrip(){
 function renderSummaryTab(){
   const now=new Date();
   const m=txns.filter(t=>{const d=new Date(t.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
-  const inc=sum(m,'income'),dly=sum(m,'daily'),fix=sum(m,'fixed'),sav=sum(m,'saving'),net=inc-dly-fix;
-  set('sIncome','฿'+f(inc));set('sDaily','฿'+f(dly));set('sFixed','฿'+f(fix));set('sSaving','฿'+f(sav));
-  set('sDailySub',cnt(m,'daily')+' รายการ');set('sFixedSub',cnt(m,'fixed')+' รายการ');set('sSavingSub',cnt(m,'saving')+' รายการ');
-  set('nb1','฿'+f(dly));set('nb2','฿'+f(fix));set('nb3','฿'+f(sav));
+  const inc=sum(m,'income'),dly=sum(m,'daily'),trv=sum(m,'travel'),fix=sum(m,'fixed'),utl=sum(m,'utility'),sav=sum(m,'saving'),net=inc-dly-trv-fix-utl;
+  set('sIncome','฿'+f(inc));set('sDaily','฿'+f(dly));set('sTravel','฿'+f(trv));set('sFixed','฿'+f(fix));set('sUtility','฿'+f(utl));set('sSaving','฿'+f(sav));
+  set('sDailySub',cnt(m,'daily')+' รายการ');set('sTravelSub',cnt(m,'travel')+' รายการ');set('sFixedSub',cnt(m,'fixed')+' รายการ');set('sUtilitySub',cnt(m,'utility')+' รายการ');set('sSavingSub',cnt(m,'saving')+' รายการ');
+  set('nb1','฿'+f(dly));set('nb2','฿'+f(trv));set('nb3','฿'+f(fix));set('nb4','฿'+f(utl));set('nb5','฿'+f(sav));
   const ne=document.getElementById('sNet');ne.textContent='฿'+f(Math.abs(net));ne.style.color=net>=0?'var(--income)':'var(--daily)';
 }
 function render(){
@@ -1145,7 +1150,7 @@ function tmgrCreateTag(){
 function renderWeekChart(){
   const el=document.getElementById('chartBars');
   const days=[];
-  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const day=txns.filter(t=>t.date===ds);days.push({lbl:d.toLocaleDateString('th-TH',{weekday:'short'}),income:sum(day,'income'),daily:sum(day,'daily'),fixed:sum(day,'fixed')});}
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const day=txns.filter(t=>t.date===ds);days.push({lbl:d.toLocaleDateString('th-TH',{weekday:'short'}),income:sum(day,'income'),daily:sum(day,'daily'),fixed:sum(day,'fixed')+sum(day,'travel')+sum(day,'utility')});}
   const max=Math.max(...days.map(d=>Math.max(d.income,d.daily+d.fixed)),1);
   el.innerHTML=days.map(d=>'<div class="cbw"><div class="cba"><div class="cb income" style="height:'+Math.max(d.income/max*100,d.income?3:0)+'%"></div><div class="cb daily" style="height:'+Math.max(d.daily/max*100,d.daily?3:0)+'%"></div><div class="cb fixed" style="height:'+Math.max(d.fixed/max*100,d.fixed?3:0)+'%"></div></div><span class="cl">'+d.lbl+'</span></div>').join('');
 }
@@ -1154,15 +1159,15 @@ function setMR(n,el){monthRange2=n;document.querySelectorAll('.mch-range-btn').f
 function renderMonthly(){
   const el=document.getElementById('mchCanvas');if(!el)return;
   const now=new Date();const months=[];
-  for(let i=monthRange2-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const yr=d.getFullYear(),mo=d.getMonth();const mt=txns.filter(t=>{const td=new Date(t.date);return td.getFullYear()===yr&&td.getMonth()===mo;});months.push({lbl:d.toLocaleDateString('th-TH',{month:'short',year:'2-digit'}),isCur:i===0,inc:sum(mt,'income'),dly:sum(mt,'daily'),fix:sum(mt,'fixed'),sav:sum(mt,'saving')});}
-  const max=Math.max(...months.map(m=>Math.max(m.inc,m.dly+m.fix+m.sav)),1)*1.08;
+  for(let i=monthRange2-1;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const yr=d.getFullYear(),mo=d.getMonth();const mt=txns.filter(t=>{const td=new Date(t.date);return td.getFullYear()===yr&&td.getMonth()===mo;});months.push({lbl:d.toLocaleDateString('th-TH',{month:'short',year:'2-digit'}),isCur:i===0,inc:sum(mt,'income'),dly:sum(mt,'daily'),trv:sum(mt,'travel'),fix:sum(mt,'fixed'),utl:sum(mt,'utility'),sav:sum(mt,'saving')});}
+  const max=Math.max(...months.map(m=>Math.max(m.inc,m.dly+m.trv+m.fix+m.utl+m.sav)),1)*1.08;
   el.innerHTML=months.map(m=>{
-    const ip=Math.min(m.inc/max*100,92),ep=Math.min((m.dly+m.fix+m.sav)/max*100,92),et=m.dly+m.fix+m.sav;
-    const net=m.inc-m.dly-m.fix;
-    const tt='<div class="tt-month">'+m.lbl+'</div><div class="tt-row"><span class="tt-lbl">รายรับ</span><span class="tt-val" style="color:#8fd4b0">฿'+f(m.inc)+'</span></div><div class="tt-row"><span class="tt-lbl">กิน/ช้อป</span><span class="tt-val" style="color:#f4a99f">฿'+f(m.dly)+'</span></div><div class="tt-row"><span class="tt-lbl">ผ่อน/บัตร</span><span class="tt-val" style="color:#d4a97a">฿'+f(m.fix)+'</span></div><div class="tt-row"><span class="tt-lbl">ออม</span><span class="tt-val" style="color:#8fb8de">฿'+f(m.sav)+'</span></div><div class="tt-divider"></div><div class="tt-row"><span class="tt-lbl">เหลือจริง</span><span class="tt-val" style="color:'+(net>=0?'#8fd4b0':'#f4a99f')+'">฿'+f(net)+'</span></div>';
+    const ip=Math.min(m.inc/max*100,92),et=m.dly+m.trv+m.fix+m.utl+m.sav,ep=Math.min(et/max*100,92);
+    const net=m.inc-m.dly-m.trv-m.fix-m.utl;
+    const tt='<div class="tt-month">'+m.lbl+'</div><div class="tt-row"><span class="tt-lbl">รายรับ</span><span class="tt-val" style="color:#8fd4b0">฿'+f(m.inc)+'</span></div><div class="tt-row"><span class="tt-lbl">กิน/ช้อป</span><span class="tt-val" style="color:#f4a99f">฿'+f(m.dly)+'</span></div><div class="tt-row"><span class="tt-lbl">เดินทาง</span><span class="tt-val" style="color:#7ec8e3">฿'+f(m.trv)+'</span></div><div class="tt-row"><span class="tt-lbl">ผ่อน/บัตร</span><span class="tt-val" style="color:#d4a97a">฿'+f(m.fix)+'</span></div><div class="tt-row"><span class="tt-lbl">Utility</span><span class="tt-val" style="color:#c4b5fd">฿'+f(m.utl)+'</span></div><div class="tt-row"><span class="tt-lbl">ออม</span><span class="tt-val" style="color:#8fb8de">฿'+f(m.sav)+'</span></div><div class="tt-divider"></div><div class="tt-row"><span class="tt-lbl">เหลือจริง</span><span class="tt-val" style="color:'+(net>=0?'#8fd4b0':'#f4a99f')+'">฿'+f(net)+'</span></div>';
     return '<div class="mch-group"><div class="mch-tooltip">'+tt+'</div>'+
       '<div class="mch-income-bar" style="height:'+Math.max(ip,m.inc?2:0)+'%"></div>'+
-      (et>0?'<div class="mch-exp-bar" style="height:'+Math.max(ep,2)+'%">'+(m.sav?'<div class="mch-seg sav" style="height:'+(m.sav/et*100)+'%"></div>':'')+(m.fix?'<div class="mch-seg fix" style="height:'+(m.fix/et*100)+'%"></div>':'')+(m.dly?'<div class="mch-seg dly" style="height:'+(m.dly/et*100)+'%"></div>':'')+'</div>':'')+
+      (et>0?'<div class="mch-exp-bar" style="height:'+Math.max(ep,2)+'%">'+(m.sav?'<div class="mch-seg sav" style="height:'+(m.sav/et*100)+'%"></div>':'')+(m.utl?'<div class="mch-seg" style="height:'+(m.utl/et*100)+'%;background:var(--utility);opacity:.75"></div>':'')+(m.fix?'<div class="mch-seg fix" style="height:'+(m.fix/et*100)+'%"></div>':'')+(m.trv?'<div class="mch-seg" style="height:'+(m.trv/et*100)+'%;background:var(--travel);opacity:.75"></div>':'')+(m.dly?'<div class="mch-seg dly" style="height:'+(m.dly/et*100)+'%"></div>':'')+'</div>':'')+
       (m.inc?'<div class="mch-idot" style="bottom:calc(22px + '+Math.max(ip,2)+'% - 3px)"></div>':'')+
       '<span class="mch-mlbl'+(m.isCur?' cur':'')+'">'+m.lbl+'</span></div>';
   }).join('');
@@ -1170,7 +1175,7 @@ function renderMonthly(){
 function renderBreakdown(){
   const now=new Date();
   const m=txns.filter(t=>{const d=new Date(t.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
-  const types=[{key:'daily',label:'🍜 กิน/ช้อป',color:'var(--daily)'},{key:'fixed',label:'💳 ผ่อน/บัตร',color:'var(--fixed)'},{key:'saving',label:'🏦 ออม',color:'var(--saving)'},{key:'income',label:'↑ รายรับ',color:'var(--income)'}];
+  const types=[{key:'daily',label:'🍜 กิน/ช้อป',color:'var(--daily)'},{key:'travel',label:'🚗 เดินทาง',color:'var(--travel)'},{key:'fixed',label:'💳 ผ่อน/บัตร',color:'var(--fixed)'},{key:'utility',label:'🏠 Utility',color:'var(--utility)'},{key:'saving',label:'🏦 ออม',color:'var(--saving)'},{key:'income',label:'↑ รายรับ',color:'var(--income)'}];
   document.getElementById('breakdownGrid').innerHTML=types.map(tp=>{
     const items=m.filter(t=>t.type===tp.key);const total=sum(items,tp.key);
     if(!items.length)return '<div class="bk-card"><div class="bk-title">'+tp.label+'</div><div style="font-size:11px;color:var(--muted)">ไม่มีรายการเดือนนี้</div></div>';
@@ -1318,7 +1323,7 @@ function showNotif(m){const el=document.getElementById('notif');el.textContent=m
 function dlCSV(){
   if(!txns.length){showNotif('ไม่มีข้อมูล');return;}
   const cm={income:'รายรับ',daily:'กิน/ช้อป',travel:'เดินทาง',fixed:'ผ่อน/บัตร/ประกัน',utility:'Utility',saving:'ออม'};
-  const rows=txns.map(t=>{const d=new Date(t.date+'T00:00:00');return t.date+','+(t.time||'')+','+d.getFullYear()+','+(d.getMonth()+1)+','+cm[t.type]+','+t.amount+',"'+t.note+'","'+(t.tags||[]).join(';')+'"';});
+  const rows=txns.map(t=>{const d=new Date(t.date+'T00:00:00');return t.date+','+(t.time||'')+','+d.getFullYear()+','+(d.getMonth()+1)+','+cm[t.type]+','+t.amount+',"'+t.note+'","'+(t.tags||[]).join(';')+'","'+(t.payment||'')+'"';});
   const blob=new Blob(['\ufeff'+['วันที่,เวลา,ปี,เดือน,ประเภท,จำนวน,รายละเอียด,Tags,วิธีจ่าย',...rows].join('\n')],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='flow-transactions.csv';a.click();showNotif('✓ ดาวน์โหลด CSV แล้ว');
 }
