@@ -124,6 +124,15 @@ header{display:flex;align-items:center;justify-content:space-between;padding:26p
 .tag-list-m{display:flex;flex-wrap:wrap;gap:5px}
 .mt{display:flex;align-items:center;gap:3px;padding:2px 7px;background:var(--tag-bg);border-radius:100px;font-size:11px;color:var(--tag-text)}
 .mt button{background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;line-height:1}
+/* Tag Manager rows */
+.tgm-row{width:100%;border:1px solid var(--border-light);border-radius:var(--rs);padding:6px 8px;margin-bottom:5px;background:var(--bg)}
+.tgm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.tgm-name{font-size:12px;color:var(--text);font-weight:500}
+.tgm-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;line-height:1;padding:0 2px}
+.tgm-del:hover{color:var(--daily)}
+.tgm-cats{display:flex;flex-wrap:wrap;gap:3px}
+.tgm-cat-pill{padding:1px 7px;border-radius:100px;font-size:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s}
+.tgm-cat-pill:hover{border-color:var(--mid);color:var(--mid)}
 .add-tag-row{display:flex;gap:5px;margin-top:8px}
 .add-tag-inp{flex:1;padding:4px 7px;border:1px solid var(--border);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:11px;outline:none;background:var(--bg);color:var(--text)}
 .add-tag-btn{padding:4px 8px;background:var(--tag-bg);border:1px solid var(--border);border-radius:var(--rs);font-size:11px;cursor:pointer;color:var(--tag-text);font-family:'DM Sans',sans-serif}
@@ -591,7 +600,10 @@ function doPost(e){
 
 <script>
 /* ── State ── */
-let txns=[],tags=["เงินเดือน","ค่าอาหาร","กาแฟ","ค่าเดินทาง","ช้อปปิ้ง","บันเทิง","สุขภาพ","ผ่อนรถ","บัตรเครดิต","ค่าประกัน","ส่วนกลาง","ออม","ลงทุน"];
+let txns=[],tags=[{name:"เงินเดือน",categories:["income"]},{name:"ค่าอาหาร",categories:["daily"]},{name:"กาแฟ",categories:["daily"]},{name:"ค่าเดินทาง",categories:["travel"]},{name:"ช้อปปิ้ง",categories:["daily"]},{name:"บันเทิง",categories:[]},{name:"สุขภาพ",categories:[]},{name:"ผ่อนรถ",categories:["fixed"]},{name:"บัตรเครดิต",categories:["fixed"]},{name:"ค่าประกัน",categories:["fixed","utility"]},{name:"ส่วนกลาง",categories:["utility"]},{name:"ออม",categories:["saving"]},{name:"ลงทุน",categories:["saving"]}];
+function tagNames(){return tags.map(t=>typeof t==='string'?t:t.name);}
+function tagObj(name){const f=tags.find(t=>(typeof t==='string'?t:t.name)===name);return f?(typeof f==='string'?{name:f,categories:[]}:f):{name,categories:[]};}
+function normalizeTags(raw){return raw.map(t=>typeof t==='string'?{name:t,categories:[]}:t);}
 let curType='income',curFilter='all',activeTag=null,selTags=[],monthRange=6,currentUser=null,unsubTxns=null;
 const CATS={income:'รายรับ',daily:'กิน/ช้อป',travel:'เดินทาง',fixed:'ผ่อน/บัตร',utility:'Utility',saving:'ออม'};
 const SIGN={income:'+',daily:'-',travel:'-',fixed:'-',utility:'-',saving:'→'};
@@ -705,7 +717,7 @@ function updateDateLbl(){}
 async function loadUserData(){
   try{
     const snap=await fb().getDocs(userCol('tags'));
-    if(!snap.empty)tags=snap.docs.map(d=>d.data().name).filter(Boolean);
+    if(!snap.empty)tags=normalizeTags(snap.docs.map(d=>d.data()).filter(d=>d.name));
   }catch(e){console.warn(e);}
   if(unsubTxns)unsubTxns();
   const q=fb().query(userCol('transactions'),fb().orderBy('date','desc'));
@@ -720,7 +732,7 @@ async function saveTags(){
   const col=userCol('tags');
   const ex=await fb().getDocs(col);
   await Promise.all(ex.docs.map(d=>fb().deleteDoc(d.ref)));
-  await Promise.all(tags.map(name=>fb().addDoc(col,{name})));
+  await Promise.all(tags.map(t=>fb().addDoc(col,{name:t.name,categories:t.categories||[]})));
 }
 
 /* ── Core ── */
@@ -736,8 +748,10 @@ function setType(t){
   ['income','daily','travel','fixed','utility','saving'].forEach(k=>{
     document.getElementById('btn-'+k).className='type-bar-btn'+(k===t?' sel-'+k:'');
   });
+  selTags=selTags.filter(s=>tags.find(tObj=>tObj.name===s&&(tObj.categories.length===0||tObj.categories.includes(t))));
   if(_noteAutofilled) updateNoteAutofill();
   updatePayToggle();
+  renderTagPicker();
 }
 function setFilter(f,el){
   curFilter=f;
@@ -748,7 +762,7 @@ function handleTagKey(e){
   if((e.key==='Enter'||e.key===',')&&e.target.value.trim()){
     e.preventDefault();
     const t=e.target.value.trim().replace(/,/g,'');
-    if(t&&!tags.includes(t)){tags.push(t);saveTags();renderTagMgr();}
+    if(t&&!tags.find(x=>x.name===t)){tags.push({name:t,categories:[curType]});saveTags();renderTagMgr();}
     if(!selTags.includes(t))selTags.push(t);
     e.target.value='';renderTagPicker();
     document.getElementById('tagNewInp').addEventListener('keydown',handleTagKey);
@@ -757,7 +771,12 @@ function handleTagKey(e){
 function renderTagPicker(){
   const wrap=document.getElementById('tagPicker'),inp=document.getElementById('tagNewInp');
   wrap.innerHTML='';
-  tags.forEach(t=>{
+  const visible=tags.filter(tObj=>{
+    const cats=tObj.categories||[];
+    return cats.length===0||cats.includes(curType);
+  });
+  visible.forEach(tObj=>{
+    const t=tObj.name;
     const c=document.createElement('span');
     c.className='qa-tag-chip'+(selTags.includes(t)?' on':'');
     c.textContent=t;
@@ -895,12 +914,48 @@ function renderHistoryBtn(){
 }
 function renderTagMgr(){
   const el=document.getElementById('tagMgr');
-  el.innerHTML=tags.map(t=>'<div class="mt"><span style="cursor:pointer" onclick="filterTag(\''+esc(t)+'\')">'+(activeTag===t?'<u>'+esc(t)+'</u>':esc(t))+'</span><button onclick="delTag(event,\''+esc(t)+'\')">×</button></div>').join('');
+  const CAT_CFG=[
+    {k:'income',lbl:'รายรับ',color:'var(--income)'},
+    {k:'daily',lbl:'กิน/ช้อป',color:'var(--daily)'},
+    {k:'travel',lbl:'เดินทาง',color:'var(--travel)'},
+    {k:'fixed',lbl:'ผ่อน/บัตร',color:'var(--fixed)'},
+    {k:'utility',lbl:'Utility',color:'var(--utility)'},
+    {k:'saving',lbl:'ออม',color:'var(--saving)'},
+  ];
+  el.innerHTML='';
+  tags.forEach((tObj,idx)=>{
+    const name=tObj.name;const cats=tObj.categories||[];
+    const row=document.createElement('div');row.className='tgm-row';
+    const top=document.createElement('div');top.className='tgm-top';
+    const nameEl=document.createElement('span');nameEl.className='tgm-name';
+    nameEl.style.cursor='pointer';
+    nameEl.onclick=()=>filterTag(name);
+    nameEl.innerHTML=(activeTag===name?'<u>'+esc(name)+'</u>':esc(name));
+    const delBtn=document.createElement('button');delBtn.className='tgm-del';delBtn.textContent='×';
+    delBtn.onclick=(e)=>delTag(e,name);
+    top.appendChild(nameEl);top.appendChild(delBtn);
+    const catRow=document.createElement('div');catRow.className='tgm-cats';
+    CAT_CFG.forEach(cfg=>{
+      const on=cats.includes(cfg.k);
+      const pill=document.createElement('button');
+      pill.className='tgm-cat-pill'+(on?' on':'');
+      if(on){pill.style.background=cfg.color;pill.style.borderColor=cfg.color;pill.style.color='#fff';}
+      pill.textContent=cfg.lbl;
+      pill.onclick=()=>{
+        const i=tObj.categories.indexOf(cfg.k);
+        if(i>=0)tObj.categories.splice(i,1);else tObj.categories.push(cfg.k);
+        saveTags();renderTagMgr();renderTagPicker();
+      };
+      catRow.appendChild(pill);
+    });
+    row.appendChild(top);row.appendChild(catRow);
+    el.appendChild(row);
+  });
   document.getElementById('tagCount').textContent=tags.length+' tags';
 }
 function filterTag(t){activeTag=activeTag===t?null:t;render();renderTagMgr();}
-function delTag(e,t){e.stopPropagation();if(!confirm('ลบ tag "'+t+'"?'))return;tags=tags.filter(x=>x!==t);saveTags();selTags=selTags.filter(x=>x!==t);renderTagMgr();renderTagPicker();}
-function createTag(){const inp=document.getElementById('newTagInp'),t=inp.value.trim();if(!t)return;if(!tags.includes(t)){tags.push(t);saveTags();renderTagMgr();renderTagPicker();showNotif('เพิ่ม "'+t+'" แล้ว');}else showNotif('Tag นี้มีอยู่แล้ว');inp.value='';}
+function delTag(e,t){e.stopPropagation();if(!confirm('ลบ tag "'+t+'"?'))return;tags=tags.filter(x=>x.name!==t);saveTags();selTags=selTags.filter(x=>x!==t);renderTagMgr();renderTagPicker();}
+function createTag(){const inp=document.getElementById('newTagInp'),t=inp.value.trim();if(!t)return;if(!tags.find(x=>x.name===t)){tags.push({name:t,categories:[]});saveTags();renderTagMgr();renderTagPicker();showNotif('เพิ่ม "'+t+'" แล้ว');}else showNotif('Tag นี้มีอยู่แล้ว');inp.value='';}
 function renderWeekChart(){
   const el=document.getElementById('chartBars');
   const days=[];
@@ -982,12 +1037,19 @@ function setEditType(t){
   });
   const epf=document.getElementById('editPayField');
   if(epf) epf.style.display=EXPENSE_TYPES_PAY.includes(t)?'block':'none';
+  _editSelTags=_editSelTags.filter(s=>tags.find(tObj=>tObj.name===s&&(tObj.categories.length===0||tObj.categories.includes(t))));
+  renderEditTags();
 }
 
 function renderEditTags(){
   const wrap=document.getElementById('editTagPicker');
   wrap.innerHTML='';
-  tags.forEach(t=>{
+  const visible=tags.filter(tObj=>{
+    const cats=tObj.categories||[];
+    return cats.length===0||cats.includes(_editType);
+  });
+  visible.forEach(tObj=>{
+    const t=tObj.name;
     const c=document.createElement('span');
     c.className='edit-tag-chip '+(_editSelTags.includes(t)?'on':'off');
     c.textContent=t;
